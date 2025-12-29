@@ -14,3 +14,6 @@ export OBSIDIAN_API_KEY="your-api-key-here"
 
 # Optional: Daily notes path format for fs-daily-append (uses strftime)
 # export OBSIDIAN_DAILY_FORMAT="Journal/%Y-%m-%d.md"
+
+# Optional: Todo file location (for todo.ts)
+# export OBSIDIAN_TODO_FILE="Inbox/Tasks.md"

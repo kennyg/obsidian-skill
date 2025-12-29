@@ -114,6 +114,33 @@ WHERE status = "ended"
 SORT startDate DESC
 ```
 
+## Todo Tracking
+
+Task management using [Obsidian Tasks](https://github.com/obsidian-tasks-group/obsidian-tasks) format.
+
+```bash
+# Add tasks with tags, priority, and due dates
+bun scripts/todo.ts add "Review PR" work --due tomorrow --priority high
+bun scripts/todo.ts add "Buy groceries" personal errands
+
+# Complete tasks by number or search
+bun scripts/todo.ts done 1
+bun scripts/todo.ts done "PR"
+
+# List and filter
+bun scripts/todo.ts list
+bun scripts/todo.ts list work
+bun scripts/todo.ts all
+```
+
+Tasks are stored in `Inbox/Tasks.md` (configurable via `OBSIDIAN_TODO_FILE`):
+
+```markdown
+- [ ] Review PR #work ⏫ 📅 2025-12-30 ➕ 2025-12-29
+- [ ] Buy groceries #personal #errands ➕ 2025-12-29
+- [x] Old task #done ➕ 2025-12-28 ✅ 2025-12-29
+```
+
 ## Why Not MCP?
 
 The [obsidian-mcp-tools](https://github.com/jacksteamdev/obsidian-mcp-tools) plugin is just a thin wrapper around the Local REST API. This skill gives you:
@@ -130,6 +157,9 @@ Add to `.zshrc` or `.bashrc`:
 ```bash
 # Oncall tracking (always works offline - uses filesystem)
 alias oncall="bun /path/to/obsidian-skill/scripts/oncall.ts"
+
+# Todo tracking (always works offline - uses filesystem)
+alias todo="bun /path/to/obsidian-skill/scripts/todo.ts"
 
 # Log thoughts to daily note (auto-detects if Obsidian is running)
 thought() {
@@ -148,6 +178,10 @@ Usage:
 ```bash
 oncall start
 oncall log "Server alert" incident
+
+todo add "Review PR" work --due tomorrow --priority high
+todo done 1
+todo list
 
 thought "Remember to review PR #42"
 thought "Idea: refactor auth module to use JWT"
