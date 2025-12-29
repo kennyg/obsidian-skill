@@ -10,17 +10,11 @@
 
 import { ObsidianClient } from './obsidian-client.ts';
 import { exists, mkdir } from 'fs/promises';
-import { join, dirname } from 'path';
+import { join } from 'path';
 
 const ONCALL_DIR = 'Journal/Oncall';
 const CURRENT_SHIFT = `${ONCALL_DIR}/current-shift.md`;
 const ARCHIVE_DIR = `${ONCALL_DIR}/archive`;
-
-interface ShiftMeta {
-  startDate: string;
-  startTime: string;
-  status: 'active' | 'ended';
-}
 
 function formatTime(): string {
   return new Date().toLocaleTimeString('en-US', {
@@ -185,7 +179,7 @@ class OncallCLI {
     }
 
     const content = await this.client.fsRead(CURRENT_SHIFT);
-    const { frontmatter, body } = parseFrontmatter(content);
+    const { body } = parseFrontmatter(content);
 
     console.log('=== Oncall Summary ===');
     console.log(body.trim());
