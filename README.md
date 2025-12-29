@@ -157,30 +157,27 @@ The [obsidian-mcp-tools](https://github.com/jacksteamdev/obsidian-mcp-tools) plu
 Add to `.zshrc` or `.bashrc`:
 
 ```bash
-# Oncall tracking (uses filesystem)
 alias oncall="bun /path/to/obsidian-skill/scripts/oncall.ts"
-
-# Todo tracking (uses filesystem)
 alias todo="bun /path/to/obsidian-skill/scripts/todo.ts"
-
-# Log thoughts to daily note (uses filesystem)
-thought() {
-  /path/to/obsidian-skill/scripts/obsidian.sh fs-daily-append "- $(date +%H:%M) $*"
-}
+alias thought="bun /path/to/obsidian-skill/scripts/thought.ts"
 ```
 
 Usage:
 
 ```bash
-oncall start
-oncall log "Server alert" incident
+# Quick thoughts to daily note
+thought "Great idea for the app"
+thought "Meeting notes" meeting work
 
+# Task management
 todo add "Review PR" work --due tomorrow --priority high
 todo done 1
 todo list
 
-thought "Remember to review PR #42"
-thought "Idea: refactor auth module to use JWT"
+# Oncall tracking
+oncall start
+oncall log "Server alert" incident
+oncall end
 ```
 
 ## Acknowledgements

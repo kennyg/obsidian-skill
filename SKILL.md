@@ -26,6 +26,13 @@ export OBSIDIAN_TODO_FILE="Inbox/Tasks.md"            # Optional
 ./scripts/obsidian.sh fs-daily-append <content> # Append to daily note
 ```
 
+### Thought (Daily Notes)
+
+```bash
+thought "Great idea for the app"
+thought "Meeting went well" meeting work
+```
+
 ### Todo Tracking
 
 ```bash
@@ -85,9 +92,9 @@ grep -r "term" "$OBSIDIAN_VAULT_PATH" --include="*.md"
 | Need | Method |
 |------|--------|
 | Fast read/write | Filesystem |
+| Quick thoughts/notes | `thought` CLI |
 | Task management | `todo` CLI |
 | Oncall/incidents | `oncall` CLI |
-| Daily note append | `fs-daily-append` |
 | Search by frontmatter | REST API |
 | Dataview queries | REST API |
 | Execute commands | REST API |
