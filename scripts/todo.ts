@@ -136,6 +136,19 @@ async function add(text: string, tags: string[], options: { due?: string; priori
   console.log(`Added: ${task}`);
 }
 
+function sortTasks(tasks: Task[]): Task[] {
+  return [...tasks].sort((a, b) => {
+    const pOrder = { high: 0, medium: 1, low: 2, undefined: 3 };
+    const pDiff = (pOrder[a.priority as keyof typeof pOrder] ?? 3) - (pOrder[b.priority as keyof typeof pOrder] ?? 3);
+    if (pDiff !== 0) return pDiff;
+
+    if (a.due && b.due) return a.due.localeCompare(b.due);
+    if (a.due) return -1;
+    if (b.due) return 1;
+    return 0;
+  });
+}
+
 async function done(query: string): Promise<void> {
   const { tasks, lines } = await readTasks();
 
@@ -144,8 +157,8 @@ async function done(query: string): Promise<void> {
   let task: Task | undefined;
 
   if (!isNaN(num)) {
-    // Find nth incomplete task
-    const incomplete = tasks.filter(t => !t.done);
+    // Find nth incomplete task (sorted same as list display)
+    const incomplete = sortTasks(tasks.filter(t => !t.done));
     task = incomplete[num - 1];
   } else {
     // Search by text
@@ -168,6 +181,34 @@ async function done(query: string): Promise<void> {
   console.log(`Done: ${task.text}`);
 }
 
+async function del(query: string): Promise<void> {
+  const { tasks, lines } = await readTasks();
+
+  // Find by line number or text search
+  const num = parseInt(query);
+  let task: Task | undefined;
+
+  if (!isNaN(num)) {
+    // Find nth incomplete task (sorted same as list display)
+    const incomplete = sortTasks(tasks.filter(t => !t.done));
+    task = incomplete[num - 1];
+  } else {
+    // Search by text
+    const lower = query.toLowerCase();
+    task = tasks.find(t => !t.done && t.text.toLowerCase().includes(lower));
+  }
+
+  if (!task) {
+    console.error('Task not found');
+    process.exit(1);
+  }
+
+  // Remove the line
+  lines.splice(task.line, 1);
+  await writeTasks(lines);
+  console.log(`Deleted: ${task.text}`);
+}
+
 async function list(filter?: string): Promise<void> {
   const { tasks } = await readTasks();
 
@@ -186,19 +227,9 @@ async function list(filter?: string): Promise<void> {
     return;
   }
 
-  // Sort by priority, then due date
-  filtered.sort((a, b) => {
-    const pOrder = { high: 0, medium: 1, low: 2, undefined: 3 };
-    const pDiff = (pOrder[a.priority as keyof typeof pOrder] ?? 3) - (pOrder[b.priority as keyof typeof pOrder] ?? 3);
-    if (pDiff !== 0) return pDiff;
+  const sorted = sortTasks(filtered);
 
-    if (a.due && b.due) return a.due.localeCompare(b.due);
-    if (a.due) return -1;
-    if (b.due) return 1;
-    return 0;
-  });
-
-  filtered.forEach((t, i) => {
+  sorted.forEach((t, i) => {
     const priority = t.priority ? ` ${EMOJI[t.priority]}` : '';
     const due = t.due ? ` ${EMOJI.due} ${t.due}` : '';
     const tags = t.tags.length ? ` ${t.tags.map(x => `#${x}`).join(' ')}` : '';
@@ -273,6 +304,14 @@ const commands: Record<string, () => Promise<void>> = {
     await done(args.slice(1).join(' '));
   },
 
+  async delete() {
+    if (!args[1]) {
+      console.error('Usage: todo delete <number or search>');
+      process.exit(1);
+    }
+    await del(args.slice(1).join(' '));
+  },
+
   async list() {
     await list(args[1]);
   },
@@ -294,6 +333,9 @@ Commands:
 
   done <number or search>
       Mark a task as complete (by list number or text search)
+
+  delete <number or search>
+      Remove a task entirely (by list number or text search)
 
   list [filter]
       Show pending tasks (optionally filtered by text/tag)
