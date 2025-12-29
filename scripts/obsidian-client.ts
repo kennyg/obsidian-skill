@@ -1,6 +1,6 @@
 /**
  * Obsidian Client - REST API + Filesystem Access
- * 
+ *
  * Environment variables (set via .envrc):
  *   OBSIDIAN_API_KEY      - API key from Local REST API plugin
  *   OBSIDIAN_VAULT_PATH   - Path to vault (for filesystem operations)
@@ -69,7 +69,7 @@ export class ObsidianClient {
   constructor(options: ClientOptions = {}) {
     this.apiKey = options.apiKey || process.env.OBSIDIAN_API_KEY || '';
     this.vaultPath = options.vaultPath || process.env.OBSIDIAN_VAULT_PATH;
-    
+
     const host = options.host || process.env.OBSIDIAN_HOST || '127.0.0.1';
     const https = options.https ?? (process.env.OBSIDIAN_HTTPS !== 'false');
     const port = options.port || Number(process.env.OBSIDIAN_PORT) || (https ? 27124 : 27123);
