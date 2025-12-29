@@ -17,6 +17,7 @@ set -e
 OBSIDIAN_HOST="${OBSIDIAN_HOST:-127.0.0.1}"
 OBSIDIAN_PORT="${OBSIDIAN_PORT:-27124}"
 OBSIDIAN_HTTPS="${OBSIDIAN_HTTPS:-true}"
+OBSIDIAN_DAILY_FORMAT="${OBSIDIAN_DAILY_FORMAT:-Journal/%Y-%m-%d.md}"
 
 if [ "$OBSIDIAN_HTTPS" = "true" ]; then
   BASE_URL="https://${OBSIDIAN_HOST}:${OBSIDIAN_PORT}"
@@ -78,6 +79,18 @@ case "$1" in
       exit 1
     fi
     grep -r -l "$2" "$OBSIDIAN_VAULT_PATH" --include="*.md" 2>/dev/null | sed "s|$OBSIDIAN_VAULT_PATH/||"
+    ;;
+
+  fs-daily-append)
+    check_vault_path
+    if [ -z "$2" ]; then
+      echo "Usage: $0 fs-daily-append <content>"
+      exit 1
+    fi
+    daily_path="$OBSIDIAN_VAULT_PATH/$(date +"$OBSIDIAN_DAILY_FORMAT")"
+    mkdir -p "$(dirname "$daily_path")"
+    echo "$2" >> "$daily_path"
+    echo "Appended to $(date +"$OBSIDIAN_DAILY_FORMAT")"
     ;;
 
   # === REST API Operations ===
@@ -244,6 +257,7 @@ Filesystem Commands (fast, no API needed):
   fs-write <path> <content> Write note via filesystem
   fs-list [dir]             List .md files
   fs-search <query>         Grep search
+  fs-daily-append <content> Append to daily note (offline)
 
 REST API - File Operations:
   list [dir]                List files in vault or directory
