@@ -83,7 +83,8 @@ async function readTasks(): Promise<{ tasks: Task[]; lines: string[] }> {
   }
 
   const content = await Bun.file(FULL_PATH).text();
-  const lines = content.split('\n');
+  // Remove trailing newline before splitting to avoid empty last element
+  const lines = content.replace(/\n$/, '').split('\n');
   const tasks: Task[] = [];
 
   lines.forEach((line, i) => {
@@ -96,7 +97,9 @@ async function readTasks(): Promise<{ tasks: Task[]; lines: string[] }> {
 
 async function writeTasks(lines: string[]): Promise<void> {
   await mkdir(join(VAULT_PATH, TODO_FILE.split('/').slice(0, -1).join('/')), { recursive: true });
-  await Bun.write(FULL_PATH, lines.join('\n'));
+  // Filter empty lines, add trailing newline
+  const cleaned = lines.filter(l => l.trim());
+  await Bun.write(FULL_PATH, cleaned.join('\n') + '\n');
 }
 
 async function add(text: string, tags: string[], options: { due?: string; priority?: string }): Promise<void> {
