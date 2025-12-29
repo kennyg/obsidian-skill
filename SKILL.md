@@ -234,6 +234,41 @@ curl -k -X POST -H "Authorization: Bearer $OBSIDIAN_API_KEY" \
   "https://127.0.0.1:27124/search/"
 ```
 
+### Todo Tracking
+
+Task management using [Obsidian Tasks](https://github.com/obsidian-tasks-group/obsidian-tasks) format.
+
+```bash
+# Add tasks with tags, priority, and due dates
+bun scripts/todo.ts add "Review PR" work --due tomorrow --priority high
+bun scripts/todo.ts add "Buy groceries" personal errands
+
+# Complete or delete tasks by number or search
+bun scripts/todo.ts done 1
+bun scripts/todo.ts done "PR"
+bun scripts/todo.ts delete 2
+
+# List and filter
+bun scripts/todo.ts list
+bun scripts/todo.ts list work
+bun scripts/todo.ts all
+```
+
+File location: `Inbox/Tasks.md` (configurable via `OBSIDIAN_TODO_FILE`)
+
+Task format:
+```markdown
+- [ ] Review PR #work ⏫ 📅 2025-12-30 ➕ 2025-12-29
+- [ ] Buy groceries #personal #errands ➕ 2025-12-29
+- [x] Old task ➕ 2025-12-28 ✅ 2025-12-29
+```
+
+Emojis:
+- `⏫` high / `🔼` medium / `🔽` low priority
+- `📅` due date
+- `➕` created date
+- `✅` completion date
+
 ### Search
 
 #### Simple Text Search
@@ -306,4 +341,5 @@ await client.appendToDaily('- Completed task');
 | Daily/periodic notes | REST API |
 | Execute Obsidian commands | REST API |
 | Oncall/incident tracking | `bun scripts/oncall.ts` |
+| Task management | `bun scripts/todo.ts` |
 | No Obsidian running | Filesystem |
