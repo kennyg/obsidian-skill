@@ -89,6 +89,10 @@ case "$1" in
     fi
     daily_path="$OBSIDIAN_VAULT_PATH/$(date +"$OBSIDIAN_DAILY_FORMAT")"
     mkdir -p "$(dirname "$daily_path")"
+    # Ensure file ends with newline before appending
+    if [ -f "$daily_path" ] && [ -s "$daily_path" ]; then
+      tail -c 1 "$daily_path" | grep -q '^$' || echo "" >> "$daily_path"
+    fi
     echo "$2" >> "$daily_path"
     echo "Appended to $(date +"$OBSIDIAN_DAILY_FORMAT")"
     ;;
