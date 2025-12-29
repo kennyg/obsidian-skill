@@ -124,9 +124,10 @@ Task management using [Obsidian Tasks](https://github.com/obsidian-tasks-group/o
 bun scripts/todo.ts add "Review PR" work --due tomorrow --priority high
 bun scripts/todo.ts add "Buy groceries" personal errands
 
-# Complete tasks by number or search
+# Complete or delete tasks by number or search
 bun scripts/todo.ts done 1
 bun scripts/todo.ts done "PR"
+bun scripts/todo.ts delete 2
 
 # List and filter
 bun scripts/todo.ts list
