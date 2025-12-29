@@ -157,21 +157,15 @@ The [obsidian-mcp-tools](https://github.com/jacksteamdev/obsidian-mcp-tools) plu
 Add to `.zshrc` or `.bashrc`:
 
 ```bash
-# Oncall tracking (always works offline - uses filesystem)
+# Oncall tracking (uses filesystem)
 alias oncall="bun /path/to/obsidian-skill/scripts/oncall.ts"
 
-# Todo tracking (always works offline - uses filesystem)
+# Todo tracking (uses filesystem)
 alias todo="bun /path/to/obsidian-skill/scripts/todo.ts"
 
-# Log thoughts to daily note (auto-detects if Obsidian is running)
+# Log thoughts to daily note (uses filesystem)
 thought() {
-  local script="/path/to/obsidian-skill/scripts/obsidian.sh"
-  local content="- $(date +%H:%M) $*"
-  if "$script" status &>/dev/null; then
-    "$script" daily-append "$content"
-  else
-    "$script" fs-daily-append "$content"
-  fi
+  /path/to/obsidian-skill/scripts/obsidian.sh fs-daily-append "- $(date +%H:%M) $*"
 }
 ```
 
