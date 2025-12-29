@@ -128,10 +128,10 @@ The [obsidian-mcp-tools](https://github.com/jacksteamdev/obsidian-mcp-tools) plu
 Add to `.zshrc` or `.bashrc`:
 
 ```bash
-# Quick oncall commands
+# Oncall tracking (always works offline - uses filesystem)
 alias oncall="bun /path/to/obsidian-skill/scripts/oncall.ts"
 
-# Log thoughts to daily note with timestamp (auto-detects if Obsidian is running)
+# Log thoughts to daily note (auto-detects if Obsidian is running)
 thought() {
   local script="/path/to/obsidian-skill/scripts/obsidian.sh"
   local content="- $(date +%H:%M) $*"
