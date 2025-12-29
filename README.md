@@ -84,12 +84,6 @@ bun scripts/oncall.ts search incident
 bun scripts/oncall.ts list
 ```
 
-**Shell alias** (add to `.zshrc` or `.bashrc`):
-
-```bash
-alias oncall="bun /path/to/obsidian-skill/scripts/oncall.ts"
-```
-
 Files:
 ```
 Journal/Oncall/
@@ -128,6 +122,30 @@ The [obsidian-mcp-tools](https://github.com/jacksteamdev/obsidian-mcp-tools) plu
 2. **Filesystem fallback** - Works even when Obsidian isn't running
 3. **Typed client** - Full TypeScript/Bun client with autocomplete
 4. **Simpler debugging** - Direct HTTP calls are easier to trace
+
+## Shell Aliases
+
+Add to `.zshrc` or `.bashrc`:
+
+```bash
+# Quick oncall commands
+alias oncall="bun /path/to/obsidian-skill/scripts/oncall.ts"
+
+# Log thoughts to daily note with timestamp
+thought() {
+  /path/to/obsidian-skill/scripts/obsidian.sh daily-append "- $(date +%H:%M) $*"
+}
+```
+
+Usage:
+
+```bash
+oncall start
+oncall log "Server alert" incident
+
+thought "Remember to review PR #42"
+thought "Idea: refactor auth module to use JWT"
+```
 
 ## Acknowledgements
 
