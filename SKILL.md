@@ -103,5 +103,6 @@ grep -r "term" "$OBSIDIAN_VAULT_PATH" --include="*.md"
 ## Reference Docs
 
 - [API Reference](references/api-reference.md) - REST API endpoints and curl examples
+- [Thought Reference](references/thought.md) - Quick notes to daily journal
 - [Todo Reference](references/todo.md) - Task management with Obsidian Tasks format
 - [Oncall Reference](references/oncall.md) - Incident tracking and shift management
