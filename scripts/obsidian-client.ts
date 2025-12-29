@@ -9,8 +9,8 @@
  *   OBSIDIAN_HTTPS        - Use HTTPS (default: true)
  */
 
-import { readFile, writeFile, readdir, mkdir } from 'fs/promises';
-import { join, dirname } from 'path';
+import { readFile, writeFile, readdir, mkdir } from "fs/promises";
+import { join, dirname } from "path";
 
 export interface NoteJson {
   path: string;
@@ -41,9 +41,9 @@ export interface Command {
   name: string;
 }
 
-export type Period = 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly';
-export type PatchOperation = 'append' | 'prepend' | 'replace';
-export type TargetType = 'heading' | 'block' | 'frontmatter';
+export type Period = "daily" | "weekly" | "monthly" | "quarterly" | "yearly";
+export type PatchOperation = "append" | "prepend" | "replace";
+export type TargetType = "heading" | "block" | "frontmatter";
 
 export interface PatchOptions {
   operation: PatchOperation;
@@ -67,50 +67,50 @@ export class ObsidianClient {
   private vaultPath: string | undefined;
 
   constructor(options: ClientOptions = {}) {
-    this.apiKey = options.apiKey || process.env.OBSIDIAN_API_KEY || '';
+    this.apiKey = options.apiKey || process.env.OBSIDIAN_API_KEY || "";
     this.vaultPath = options.vaultPath || process.env.OBSIDIAN_VAULT_PATH;
 
-    const host = options.host || process.env.OBSIDIAN_HOST || '127.0.0.1';
-    const https = options.https ?? (process.env.OBSIDIAN_HTTPS !== 'false');
+    const host = options.host || process.env.OBSIDIAN_HOST || "127.0.0.1";
+    const https = options.https ?? process.env.OBSIDIAN_HTTPS !== "false";
     const port = options.port || Number(process.env.OBSIDIAN_PORT) || (https ? 27124 : 27123);
-    this.baseUrl = `${https ? 'https' : 'http'}://${host}:${port}`;
+    this.baseUrl = `${https ? "https" : "http"}://${host}:${port}`;
   }
 
   // === Filesystem Operations (fast, no API) ===
 
   private getFullPath(notePath: string): string {
     if (!this.vaultPath) {
-      throw new Error('OBSIDIAN_VAULT_PATH not set');
+      throw new Error("OBSIDIAN_VAULT_PATH not set");
     }
     return join(this.vaultPath, notePath);
   }
 
   async fsRead(notePath: string): Promise<string> {
-    return readFile(this.getFullPath(notePath), 'utf-8');
+    return readFile(this.getFullPath(notePath), "utf-8");
   }
 
   async fsWrite(notePath: string, content: string): Promise<void> {
     const fullPath = this.getFullPath(notePath);
     await mkdir(dirname(fullPath), { recursive: true });
-    await writeFile(fullPath, content, 'utf-8');
+    await writeFile(fullPath, content, "utf-8");
   }
 
-  async fsList(directory = ''): Promise<string[]> {
+  async fsList(directory = ""): Promise<string[]> {
     const fullPath = this.getFullPath(directory);
     const entries = await readdir(fullPath, { withFileTypes: true, recursive: true });
     return entries
-      .filter(e => e.isFile() && e.name.endsWith('.md'))
-      .map(e => join(e.parentPath || e.path || '', e.name).replace(this.vaultPath! + '/', ''));
+      .filter((e) => e.isFile() && e.name.endsWith(".md"))
+      .map((e) => join(e.parentPath || e.path || "", e.name).replace(this.vaultPath! + "/", ""));
   }
 
   // === REST API Operations ===
 
   private async request<T>(
     path: string,
-    options: RequestInit & { accept?: string } = {}
+    options: RequestInit & { accept?: string } = {},
   ): Promise<T> {
     if (!this.apiKey) {
-      throw new Error('OBSIDIAN_API_KEY not set');
+      throw new Error("OBSIDIAN_API_KEY not set");
     }
 
     const headers: Record<string, string> = {
@@ -134,8 +134,11 @@ export class ObsidianClient {
       throw new Error(`Obsidian API error ${response.status}: ${error}`);
     }
 
-    const contentType = response.headers.get('content-type') || '';
-    if (contentType.includes('application/json') || contentType.includes('application/vnd.olrapi')) {
+    const contentType = response.headers.get("content-type") || "";
+    if (
+      contentType.includes("application/json") ||
+      contentType.includes("application/vnd.olrapi")
+    ) {
       return response.json() as Promise<T>;
     }
     return response.text() as unknown as T;
@@ -143,8 +146,8 @@ export class ObsidianClient {
 
   // === Vault Files ===
 
-  async listFiles(directory = ''): Promise<{ files: string[] }> {
-    const path = directory ? `/vault/${directory}/` : '/vault/';
+  async listFiles(directory = ""): Promise<{ files: string[] }> {
+    const path = directory ? `/vault/${directory}/` : "/vault/";
     return this.request<{ files: string[] }>(path);
   }
 
@@ -154,68 +157,68 @@ export class ObsidianClient {
 
   async getNoteWithMetadata(filePath: string): Promise<NoteJson> {
     return this.request<NoteJson>(`/vault/${filePath}`, {
-      accept: 'application/vnd.olrapi.note+json',
+      accept: "application/vnd.olrapi.note+json",
     });
   }
 
   async createOrUpdateNote(filePath: string, content: string): Promise<void> {
     await this.request(`/vault/${filePath}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'text/markdown' },
+      method: "PUT",
+      headers: { "Content-Type": "text/markdown" },
       body: content,
     });
   }
 
   async appendToNote(filePath: string, content: string): Promise<void> {
     await this.request(`/vault/${filePath}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/markdown' },
+      method: "POST",
+      headers: { "Content-Type": "text/markdown" },
       body: content,
     });
   }
 
   async patchNote(filePath: string, content: string, options: PatchOptions): Promise<void> {
     const headers: Record<string, string> = {
-      'Content-Type': 'text/markdown',
+      "Content-Type": "text/markdown",
       Operation: options.operation,
-      'Target-Type': options.targetType,
+      "Target-Type": options.targetType,
       Target: options.target,
     };
 
     if (options.targetDelimiter) {
-      headers['Target-Delimiter'] = options.targetDelimiter;
+      headers["Target-Delimiter"] = options.targetDelimiter;
     }
     if (options.createIfMissing) {
-      headers['Create-Target-If-Missing'] = 'true';
+      headers["Create-Target-If-Missing"] = "true";
     }
 
     await this.request(`/vault/${filePath}`, {
-      method: 'PATCH',
+      method: "PATCH",
       headers,
       body: content,
     });
   }
 
   async deleteNote(filePath: string): Promise<void> {
-    await this.request(`/vault/${filePath}`, { method: 'DELETE' });
+    await this.request(`/vault/${filePath}`, { method: "DELETE" });
   }
 
   // === Active File ===
 
   async getActiveFile(): Promise<string> {
-    return this.request<string>('/active/');
+    return this.request<string>("/active/");
   }
 
   async getActiveFileWithMetadata(): Promise<NoteJson> {
-    return this.request<NoteJson>('/active/', {
-      accept: 'application/vnd.olrapi.note+json',
+    return this.request<NoteJson>("/active/", {
+      accept: "application/vnd.olrapi.note+json",
     });
   }
 
   async appendToActiveFile(content: string): Promise<void> {
-    await this.request('/active/', {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/markdown' },
+    await this.request("/active/", {
+      method: "POST",
+      headers: { "Content-Type": "text/markdown" },
       body: content,
     });
   }
@@ -230,25 +233,25 @@ export class ObsidianClient {
     period: Period,
     year: number,
     month: number,
-    day: number
+    day: number,
   ): Promise<string> {
     return this.request<string>(`/periodic/${period}/${year}/${month}/${day}/`);
   }
 
   async appendToPeriodicNote(period: Period, content: string): Promise<void> {
     await this.request(`/periodic/${period}/`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/markdown' },
+      method: "POST",
+      headers: { "Content-Type": "text/markdown" },
       body: content,
     });
   }
 
   async appendToDaily(content: string): Promise<void> {
-    return this.appendToPeriodicNote('daily', content);
+    return this.appendToPeriodicNote("daily", content);
   }
 
   async getDaily(): Promise<string> {
-    return this.getPeriodicNote('daily');
+    return this.getPeriodicNote("daily");
   }
 
   // === Search ===
@@ -256,30 +259,30 @@ export class ObsidianClient {
   async searchSimple(query: string, contextLength = 100): Promise<SearchResult[]> {
     return this.request<SearchResult[]>(
       `/search/simple/?query=${encodeURIComponent(query)}&contextLength=${contextLength}`,
-      { method: 'POST' }
+      { method: "POST" },
     );
   }
 
   async searchJsonLogic(query: object): Promise<SearchResult[]> {
-    return this.request<SearchResult[]>('/search/', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/vnd.olrapi.jsonlogic+json' },
+    return this.request<SearchResult[]>("/search/", {
+      method: "POST",
+      headers: { "Content-Type": "application/vnd.olrapi.jsonlogic+json" },
       body: JSON.stringify(query),
     });
   }
 
   async searchByTag(tag: string): Promise<SearchResult[]> {
-    return this.searchJsonLogic({ in: [tag, { var: 'tags' }] });
+    return this.searchJsonLogic({ in: [tag, { var: "tags" }] });
   }
 
   async searchByFrontmatter(field: string, value: unknown): Promise<SearchResult[]> {
-    return this.searchJsonLogic({ '==': [{ var: `frontmatter.${field}` }, value] });
+    return this.searchJsonLogic({ "==": [{ var: `frontmatter.${field}` }, value] });
   }
 
   async searchDataview(dql: string): Promise<SearchResult[]> {
-    return this.request<SearchResult[]>('/search/', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/vnd.olrapi.dataview.dql+txt' },
+    return this.request<SearchResult[]>("/search/", {
+      method: "POST",
+      headers: { "Content-Type": "application/vnd.olrapi.dataview.dql+txt" },
       body: dql,
     });
   }
@@ -287,22 +290,26 @@ export class ObsidianClient {
   // === Commands ===
 
   async listCommands(): Promise<{ commands: Command[] }> {
-    return this.request<{ commands: Command[] }>('/commands/');
+    return this.request<{ commands: Command[] }>("/commands/");
   }
 
   async executeCommand(commandId: string): Promise<void> {
-    await this.request(`/commands/${commandId}/`, { method: 'POST' });
+    await this.request(`/commands/${commandId}/`, { method: "POST" });
   }
 
   // === Utility ===
 
   async openInObsidian(filePath: string, newLeaf = false): Promise<void> {
-    const query = newLeaf ? '?newLeaf=true' : '';
-    await this.request(`/open/${filePath}${query}`, { method: 'POST' });
+    const query = newLeaf ? "?newLeaf=true" : "";
+    await this.request(`/open/${filePath}${query}`, { method: "POST" });
   }
 
-  async getStatus(): Promise<{ ok: string; authenticated: boolean; versions: { self: string; obsidian: string } }> {
-    return this.request('/');
+  async getStatus(): Promise<{
+    ok: string;
+    authenticated: boolean;
+    versions: { self: string; obsidian: string };
+  }> {
+    return this.request("/");
   }
 }
 
@@ -315,18 +322,18 @@ if (import.meta.main) {
 
   const commands: Record<string, () => Promise<void>> = {
     // Filesystem commands
-    async 'fs-read'() {
-      if (!args[0]) throw new Error('Usage: fs-read <path>');
+    async "fs-read"() {
+      if (!args[0]) throw new Error("Usage: fs-read <path>");
       console.log(await client.fsRead(args[0]));
     },
-    async 'fs-write'() {
-      if (!args[0] || !args[1]) throw new Error('Usage: fs-write <path> <content>');
-      await client.fsWrite(args[0], args.slice(1).join(' '));
+    async "fs-write"() {
+      if (!args[0] || !args[1]) throw new Error("Usage: fs-write <path> <content>");
+      await client.fsWrite(args[0], args.slice(1).join(" "));
       console.log(`Written to ${args[0]}`);
     },
-    async 'fs-list'() {
+    async "fs-list"() {
       const files = await client.fsList(args[0]);
-      files.forEach(f => console.log(f));
+      files.forEach((f) => console.log(f));
     },
 
     // API commands
@@ -337,39 +344,39 @@ if (import.meta.main) {
       console.log(await client.listFiles(args[0]));
     },
     async read() {
-      if (!args[0]) throw new Error('Usage: read <path>');
+      if (!args[0]) throw new Error("Usage: read <path>");
       console.log(await client.getNote(args[0]));
     },
     async meta() {
-      if (!args[0]) throw new Error('Usage: meta <path>');
+      if (!args[0]) throw new Error("Usage: meta <path>");
       console.log(JSON.stringify(await client.getNoteWithMetadata(args[0]), null, 2));
     },
     async search() {
-      if (!args[0]) throw new Error('Usage: search <query>');
-      console.log(JSON.stringify(await client.searchSimple(args.join(' ')), null, 2));
+      if (!args[0]) throw new Error("Usage: search <query>");
+      console.log(JSON.stringify(await client.searchSimple(args.join(" ")), null, 2));
     },
     async daily() {
       console.log(await client.getDaily());
     },
-    async 'daily-append'() {
-      if (!args[0]) throw new Error('Usage: daily-append <content>');
-      await client.appendToDaily(args.join(' '));
-      console.log('Appended to daily note');
+    async "daily-append"() {
+      if (!args[0]) throw new Error("Usage: daily-append <content>");
+      await client.appendToDaily(args.join(" "));
+      console.log("Appended to daily note");
     },
     async commands() {
       console.log(JSON.stringify(await client.listCommands(), null, 2));
     },
     async exec() {
-      if (!args[0]) throw new Error('Usage: exec <command-id>');
+      if (!args[0]) throw new Error("Usage: exec <command-id>");
       await client.executeCommand(args[0]);
       console.log(`Executed: ${args[0]}`);
     },
     async env() {
-      console.log('OBSIDIAN_VAULT_PATH:', process.env.OBSIDIAN_VAULT_PATH || '<not set>');
-      console.log('OBSIDIAN_API_KEY:', process.env.OBSIDIAN_API_KEY ? '<set>' : '<not set>');
-      console.log('OBSIDIAN_HOST:', process.env.OBSIDIAN_HOST || '127.0.0.1');
-      console.log('OBSIDIAN_PORT:', process.env.OBSIDIAN_PORT || '27124');
-      console.log('OBSIDIAN_HTTPS:', process.env.OBSIDIAN_HTTPS || 'true');
+      console.log("OBSIDIAN_VAULT_PATH:", process.env.OBSIDIAN_VAULT_PATH || "<not set>");
+      console.log("OBSIDIAN_API_KEY:", process.env.OBSIDIAN_API_KEY ? "<set>" : "<not set>");
+      console.log("OBSIDIAN_HOST:", process.env.OBSIDIAN_HOST || "127.0.0.1");
+      console.log("OBSIDIAN_PORT:", process.env.OBSIDIAN_PORT || "27124");
+      console.log("OBSIDIAN_HTTPS:", process.env.OBSIDIAN_HTTPS || "true");
     },
   };
 
@@ -404,7 +411,7 @@ REST API Commands:
   try {
     await commands[command]();
   } catch (error) {
-    console.error('Error:', error instanceof Error ? error.message : error);
+    console.error("Error:", error instanceof Error ? error.message : error);
     process.exit(1);
   }
 }

@@ -8,13 +8,13 @@ Task management using [Obsidian Tasks](https://github.com/obsidian-tasks-group/o
 bun scripts/todo.ts <command> [args]
 ```
 
-| Command | Description |
-|---------|-------------|
-| `add <text> [tags...] [--due DATE] [--priority LEVEL]` | Add a task |
-| `done <number or search>` | Mark task complete |
-| `delete <number or search>` | Remove task entirely |
-| `list [filter]` | Show pending tasks |
-| `all` | Show pending + recently completed |
+| Command                                                | Description                       |
+| ------------------------------------------------------ | --------------------------------- |
+| `add <text> [tags...] [--due DATE] [--priority LEVEL]` | Add a task                        |
+| `done <number or search>`                              | Mark task complete                |
+| `delete <number or search>`                            | Remove task entirely              |
+| `list [filter]`                                        | Show pending tasks                |
+| `all`                                                  | Show pending + recently completed |
 
 ## Examples
 
@@ -41,11 +41,13 @@ todo all
 ## Options
 
 ### Priority
+
 - `--priority high` or `-p h` → ⏫
 - `--priority medium` or `-p med` → 🔼
 - `--priority low` or `-p l` → 🔽
 
 ### Due Date
+
 - `--due today`
 - `--due tomorrow`
 - `--due 2025-12-31`
@@ -62,20 +64,21 @@ Tasks are stored in Obsidian Tasks plugin format:
 
 ### Emoji Reference
 
-| Emoji | Meaning |
-|-------|---------|
-| `⏫` | High priority |
-| `🔼` | Medium priority |
-| `🔽` | Low priority |
-| `📅` | Due date |
-| `➕` | Created date |
-| `✅` | Completion date |
+| Emoji | Meaning         |
+| ----- | --------------- |
+| `⏫`  | High priority   |
+| `🔼`  | Medium priority |
+| `🔽`  | Low priority    |
+| `📅`  | Due date        |
+| `➕`  | Created date    |
+| `✅`  | Completion date |
 
 ## File Location
 
 Default: `Inbox/Tasks.md`
 
 Configure via environment variable:
+
 ```bash
 export OBSIDIAN_TODO_FILE="Tasks/todo.md"
 ```
@@ -83,6 +86,7 @@ export OBSIDIAN_TODO_FILE="Tasks/todo.md"
 ## Task Sorting
 
 Tasks are sorted by:
+
 1. Priority (high → medium → low → none)
 2. Due date (earliest first)
 

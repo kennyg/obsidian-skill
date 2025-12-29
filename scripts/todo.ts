@@ -8,28 +8,28 @@
  * Usage: bun todo.ts <command> [args]
  */
 
-import { exists, mkdir } from 'fs/promises';
-import { join } from 'path';
+import { exists, mkdir } from "fs/promises";
+import { join } from "path";
 
 const VAULT_PATH = process.env.OBSIDIAN_VAULT_PATH;
 if (!VAULT_PATH) {
-  console.error('Error: OBSIDIAN_VAULT_PATH not set');
+  console.error("Error: OBSIDIAN_VAULT_PATH not set");
   process.exit(1);
 }
 
-const TODO_FILE = process.env.OBSIDIAN_TODO_FILE || 'Inbox/Tasks.md';
+const TODO_FILE = process.env.OBSIDIAN_TODO_FILE || "Inbox/Tasks.md";
 const FULL_PATH = join(VAULT_PATH, TODO_FILE);
 
 // Task plugin emoji format
 const EMOJI = {
-  due: '📅',
-  created: '➕',
-  done: '✅',
-  scheduled: '⏳',
-  start: '🛫',
-  high: '⏫',
-  medium: '🔼',
-  low: '🔽',
+  due: "📅",
+  created: "➕",
+  done: "✅",
+  scheduled: "⏳",
+  start: "🛫",
+  high: "⏫",
+  medium: "🔼",
+  low: "🔽",
 };
 
 interface Task {
@@ -40,41 +40,50 @@ interface Task {
   tags: string[];
   due?: string;
   created?: string;
-  priority?: 'high' | 'medium' | 'low';
+  priority?: "high" | "medium" | "low";
 }
 
 function formatDate(date?: Date): string {
-  return (date || new Date()).toISOString().split('T')[0];
+  return (date || new Date()).toISOString().split("T")[0];
 }
 
 function parseTask(line: string, lineNum: number): Task | null {
   const match = line.match(/^- \[([ x])\] (.+)$/);
   if (!match) return null;
 
-  const done = match[1] === 'x';
+  const done = match[1] === "x";
   const content = match[2];
 
   // Extract tags
-  const tags = (content.match(/#[\w-]+/g) || []).map(t => t.slice(1));
+  const tags = (content.match(/#[\w-]+/g) || []).map((t) => t.slice(1));
 
   // Extract dates
   const dueMatch = content.match(/📅 (\d{4}-\d{2}-\d{2})/);
   const createdMatch = content.match(/➕ (\d{4}-\d{2}-\d{2})/);
 
   // Extract priority
-  let priority: 'high' | 'medium' | 'low' | undefined;
-  if (content.includes('⏫')) priority = 'high';
-  else if (content.includes('🔼')) priority = 'medium';
-  else if (content.includes('🔽')) priority = 'low';
+  let priority: "high" | "medium" | "low" | undefined;
+  if (content.includes("⏫")) priority = "high";
+  else if (content.includes("🔼")) priority = "medium";
+  else if (content.includes("🔽")) priority = "low";
 
   // Clean text (remove metadata)
   const text = content
-    .replace(/#[\w-]+/g, '')
-    .replace(/[📅➕✅⏳🛫⏫🔼🔽] \d{4}-\d{2}-\d{2}/g, '')
-    .replace(/[⏫🔼🔽]/g, '')
+    .replace(/#[\w-]+/g, "")
+    .replace(/[📅➕✅⏳🛫⏫🔼🔽] \d{4}-\d{2}-\d{2}/g, "")
+    .replace(/[⏫🔼🔽]/g, "")
     .trim();
 
-  return { line: lineNum, raw: line, done, text, tags, due: dueMatch?.[1], created: createdMatch?.[1], priority };
+  return {
+    line: lineNum,
+    raw: line,
+    done,
+    text,
+    tags,
+    due: dueMatch?.[1],
+    created: createdMatch?.[1],
+    priority,
+  };
 }
 
 async function readTasks(): Promise<{ tasks: Task[]; lines: string[] }> {
@@ -84,7 +93,7 @@ async function readTasks(): Promise<{ tasks: Task[]; lines: string[] }> {
 
   const content = await Bun.file(FULL_PATH).text();
   // Remove trailing newline before splitting to avoid empty last element
-  const lines = content.replace(/\n$/, '').split('\n');
+  const lines = content.replace(/\n$/, "").split("\n");
   const tasks: Task[] = [];
 
   lines.forEach((line, i) => {
@@ -96,35 +105,42 @@ async function readTasks(): Promise<{ tasks: Task[]; lines: string[] }> {
 }
 
 async function writeTasks(lines: string[]): Promise<void> {
-  await mkdir(join(VAULT_PATH, TODO_FILE.split('/').slice(0, -1).join('/')), { recursive: true });
+  await mkdir(join(VAULT_PATH, TODO_FILE.split("/").slice(0, -1).join("/")), { recursive: true });
   // Filter empty lines, add trailing newline
-  const cleaned = lines.filter(l => l.trim());
-  await Bun.write(FULL_PATH, cleaned.join('\n') + '\n');
+  const cleaned = lines.filter((l) => l.trim());
+  await Bun.write(FULL_PATH, cleaned.join("\n") + "\n");
 }
 
-async function add(text: string, tags: string[], options: { due?: string; priority?: string }): Promise<void> {
+async function add(
+  text: string,
+  tags: string[],
+  options: { due?: string; priority?: string },
+): Promise<void> {
   const { lines } = await readTasks();
 
   let task = `- [ ] ${text}`;
 
   // Add tags
   if (tags.length) {
-    task += ' ' + tags.map(t => `#${t}`).join(' ');
+    task += " " + tags.map((t) => `#${t}`).join(" ");
   }
 
   // Add priority
   if (options.priority) {
     const p = options.priority.toLowerCase();
-    if (p === 'high' || p === 'h') task += ` ${EMOJI.high}`;
-    else if (p === 'medium' || p === 'med' || p === 'm') task += ` ${EMOJI.medium}`;
-    else if (p === 'low' || p === 'l') task += ` ${EMOJI.low}`;
+    if (p === "high" || p === "h") task += ` ${EMOJI.high}`;
+    else if (p === "medium" || p === "med" || p === "m") task += ` ${EMOJI.medium}`;
+    else if (p === "low" || p === "l") task += ` ${EMOJI.low}`;
   }
 
   // Add due date
   if (options.due) {
-    const due = options.due === 'today' ? formatDate() :
-                options.due === 'tomorrow' ? formatDate(new Date(Date.now() + 86400000)) :
-                options.due;
+    const due =
+      options.due === "today"
+        ? formatDate()
+        : options.due === "tomorrow"
+          ? formatDate(new Date(Date.now() + 86400000))
+          : options.due;
     task += ` ${EMOJI.due} ${due}`;
   }
 
@@ -139,7 +155,9 @@ async function add(text: string, tags: string[], options: { due?: string; priori
 function sortTasks(tasks: Task[]): Task[] {
   return [...tasks].sort((a, b) => {
     const pOrder = { high: 0, medium: 1, low: 2, undefined: 3 };
-    const pDiff = (pOrder[a.priority as keyof typeof pOrder] ?? 3) - (pOrder[b.priority as keyof typeof pOrder] ?? 3);
+    const pDiff =
+      (pOrder[a.priority as keyof typeof pOrder] ?? 3) -
+      (pOrder[b.priority as keyof typeof pOrder] ?? 3);
     if (pDiff !== 0) return pDiff;
 
     if (a.due && b.due) return a.due.localeCompare(b.due);
@@ -158,23 +176,21 @@ async function done(query: string): Promise<void> {
 
   if (!isNaN(num)) {
     // Find nth incomplete task (sorted same as list display)
-    const incomplete = sortTasks(tasks.filter(t => !t.done));
+    const incomplete = sortTasks(tasks.filter((t) => !t.done));
     task = incomplete[num - 1];
   } else {
     // Search by text
     const lower = query.toLowerCase();
-    task = tasks.find(t => !t.done && t.text.toLowerCase().includes(lower));
+    task = tasks.find((t) => !t.done && t.text.toLowerCase().includes(lower));
   }
 
   if (!task) {
-    console.error('Task not found');
+    console.error("Task not found");
     process.exit(1);
   }
 
   // Mark as done
-  const updated = task.raw
-    .replace('- [ ]', '- [x]')
-    + ` ${EMOJI.done} ${formatDate()}`;
+  const updated = task.raw.replace("- [ ]", "- [x]") + ` ${EMOJI.done} ${formatDate()}`;
 
   lines[task.line] = updated;
   await writeTasks(lines);
@@ -190,16 +206,16 @@ async function del(query: string): Promise<void> {
 
   if (!isNaN(num)) {
     // Find nth incomplete task (sorted same as list display)
-    const incomplete = sortTasks(tasks.filter(t => !t.done));
+    const incomplete = sortTasks(tasks.filter((t) => !t.done));
     task = incomplete[num - 1];
   } else {
     // Search by text
     const lower = query.toLowerCase();
-    task = tasks.find(t => !t.done && t.text.toLowerCase().includes(lower));
+    task = tasks.find((t) => !t.done && t.text.toLowerCase().includes(lower));
   }
 
   if (!task) {
-    console.error('Task not found');
+    console.error("Task not found");
     process.exit(1);
   }
 
@@ -212,27 +228,28 @@ async function del(query: string): Promise<void> {
 async function list(filter?: string): Promise<void> {
   const { tasks } = await readTasks();
 
-  let filtered = tasks.filter(t => !t.done);
+  let filtered = tasks.filter((t) => !t.done);
 
   if (filter) {
     const lower = filter.toLowerCase();
-    filtered = filtered.filter(t =>
-      t.text.toLowerCase().includes(lower) ||
-      t.tags.some(tag => tag.toLowerCase().includes(lower))
+    filtered = filtered.filter(
+      (t) =>
+        t.text.toLowerCase().includes(lower) ||
+        t.tags.some((tag) => tag.toLowerCase().includes(lower)),
     );
   }
 
   if (filtered.length === 0) {
-    console.log('No tasks found.');
+    console.log("No tasks found.");
     return;
   }
 
   const sorted = sortTasks(filtered);
 
   sorted.forEach((t, i) => {
-    const priority = t.priority ? ` ${EMOJI[t.priority]}` : '';
-    const due = t.due ? ` ${EMOJI.due} ${t.due}` : '';
-    const tags = t.tags.length ? ` ${t.tags.map(x => `#${x}`).join(' ')}` : '';
+    const priority = t.priority ? ` ${EMOJI[t.priority]}` : "";
+    const due = t.due ? ` ${EMOJI.due} ${t.due}` : "";
+    const tags = t.tags.length ? ` ${t.tags.map((x) => `#${x}`).join(" ")}` : "";
     console.log(`${i + 1}. ${t.text}${priority}${due}${tags}`);
   });
 }
@@ -240,27 +257,27 @@ async function list(filter?: string): Promise<void> {
 async function listAll(): Promise<void> {
   const { tasks } = await readTasks();
 
-  const incomplete = tasks.filter(t => !t.done);
-  const complete = tasks.filter(t => t.done).slice(-5);
+  const incomplete = tasks.filter((t) => !t.done);
+  const complete = tasks.filter((t) => t.done).slice(-5);
 
   if (incomplete.length) {
-    console.log('=== Pending ===');
+    console.log("=== Pending ===");
     incomplete.forEach((t, i) => {
-      const priority = t.priority ? ` ${EMOJI[t.priority]}` : '';
-      const due = t.due ? ` ${EMOJI.due} ${t.due}` : '';
+      const priority = t.priority ? ` ${EMOJI[t.priority]}` : "";
+      const due = t.due ? ` ${EMOJI.due} ${t.due}` : "";
       console.log(`${i + 1}. ${t.text}${priority}${due}`);
     });
   }
 
   if (complete.length) {
-    console.log('\n=== Recently Done ===');
-    complete.forEach(t => {
+    console.log("\n=== Recently Done ===");
+    complete.forEach((t) => {
       console.log(`✓ ${t.text}`);
     });
   }
 
   if (!incomplete.length && !complete.length) {
-    console.log('No tasks.');
+    console.log("No tasks.");
   }
 }
 
@@ -274,9 +291,9 @@ function parseArgs(args: string[]): { positional: string[]; options: Record<stri
   const options: Record<string, string> = {};
 
   for (let i = 0; i < args.length; i++) {
-    if (args[i].startsWith('--')) {
+    if (args[i].startsWith("--")) {
       const key = args[i].slice(2);
-      options[key] = args[++i] || '';
+      options[key] = args[++i] || "";
     } else {
       positional.push(args[i]);
     }
@@ -298,18 +315,18 @@ const commands: Record<string, () => Promise<void>> = {
 
   async done() {
     if (!args[1]) {
-      console.error('Usage: todo done <number or search>');
+      console.error("Usage: todo done <number or search>");
       process.exit(1);
     }
-    await done(args.slice(1).join(' '));
+    await done(args.slice(1).join(" "));
   },
 
   async delete() {
     if (!args[1]) {
-      console.error('Usage: todo delete <number or search>');
+      console.error("Usage: todo delete <number or search>");
       process.exit(1);
     }
-    await del(args.slice(1).join(' '));
+    await del(args.slice(1).join(" "));
   },
 
   async list() {
@@ -359,6 +376,6 @@ File: ${TODO_FILE}
 try {
   await commands[command]();
 } catch (error) {
-  console.error('Error:', error instanceof Error ? error.message : error);
+  console.error("Error:", error instanceof Error ? error.message : error);
   process.exit(1);
 }

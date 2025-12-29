@@ -6,42 +6,45 @@ Requires [Local REST API plugin](https://github.com/coddingtonbear/obsidian-loca
 
 ## Endpoints Summary
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/` | Server status |
-| GET | `/vault/` | List root files |
-| GET | `/vault/{dir}/` | List directory files |
-| GET | `/vault/{path}` | Read file |
-| PUT | `/vault/{path}` | Create/update file |
-| POST | `/vault/{path}` | Append to file |
-| PATCH | `/vault/{path}` | Patch file (heading/block/frontmatter) |
-| DELETE | `/vault/{path}` | Delete file |
-| GET | `/active/` | Get active file |
-| POST | `/active/` | Append to active file |
-| PATCH | `/active/` | Patch active file |
-| GET | `/periodic/{period}/` | Get current periodic note |
-| GET | `/periodic/{period}/{y}/{m}/{d}/` | Get specific date note |
-| POST | `/periodic/{period}/` | Append to periodic note |
-| POST | `/search/simple/?query=...` | Simple text search |
-| POST | `/search/` | JsonLogic or Dataview search |
-| GET | `/commands/` | List commands |
-| POST | `/commands/{id}/` | Execute command |
-| POST | `/open/{path}` | Open file in Obsidian |
+| Method | Endpoint                          | Description                            |
+| ------ | --------------------------------- | -------------------------------------- |
+| GET    | `/`                               | Server status                          |
+| GET    | `/vault/`                         | List root files                        |
+| GET    | `/vault/{dir}/`                   | List directory files                   |
+| GET    | `/vault/{path}`                   | Read file                              |
+| PUT    | `/vault/{path}`                   | Create/update file                     |
+| POST   | `/vault/{path}`                   | Append to file                         |
+| PATCH  | `/vault/{path}`                   | Patch file (heading/block/frontmatter) |
+| DELETE | `/vault/{path}`                   | Delete file                            |
+| GET    | `/active/`                        | Get active file                        |
+| POST   | `/active/`                        | Append to active file                  |
+| PATCH  | `/active/`                        | Patch active file                      |
+| GET    | `/periodic/{period}/`             | Get current periodic note              |
+| GET    | `/periodic/{period}/{y}/{m}/{d}/` | Get specific date note                 |
+| POST   | `/periodic/{period}/`             | Append to periodic note                |
+| POST   | `/search/simple/?query=...`       | Simple text search                     |
+| POST   | `/search/`                        | JsonLogic or Dataview search           |
+| GET    | `/commands/`                      | List commands                          |
+| POST   | `/commands/{id}/`                 | Execute command                        |
+| POST   | `/open/{path}`                    | Open file in Obsidian                  |
 
 ## Headers
 
 **Required**: `Authorization: Bearer <api-key>`
 
 **Optional (for reads)**:
+
 - `Accept: application/vnd.olrapi.note+json` - Get JSON with metadata
 
 **For PATCH**:
+
 - `Operation: append|prepend|replace`
 - `Target-Type: heading|block|frontmatter`
 - `Target: <target-name>`
 - `Target-Delimiter: ::` (for nested headings)
 
 **For Search**:
+
 - `Content-Type: application/vnd.olrapi.jsonlogic+json` - JsonLogic query
 - `Content-Type: application/vnd.olrapi.dataview.dql+txt` - Dataview DQL
 
@@ -89,6 +92,7 @@ Requires [Local REST API plugin](https://github.com/coddingtonbear/obsidian-loca
 ## Curl Examples
 
 ### Read Note
+
 ```bash
 # As markdown
 curl -k -H "Authorization: Bearer $OBSIDIAN_API_KEY" \
@@ -101,6 +105,7 @@ curl -k -H "Authorization: Bearer $OBSIDIAN_API_KEY" \
 ```
 
 ### Create/Update Note
+
 ```bash
 curl -k -X PUT -H "Authorization: Bearer $OBSIDIAN_API_KEY" \
   -H "Content-Type: text/markdown" \
@@ -109,6 +114,7 @@ curl -k -X PUT -H "Authorization: Bearer $OBSIDIAN_API_KEY" \
 ```
 
 ### Append to Note
+
 ```bash
 curl -k -X POST -H "Authorization: Bearer $OBSIDIAN_API_KEY" \
   -H "Content-Type: text/markdown" \
@@ -117,6 +123,7 @@ curl -k -X POST -H "Authorization: Bearer $OBSIDIAN_API_KEY" \
 ```
 
 ### Patch Note
+
 ```bash
 # Append under a heading
 curl -k -X PATCH -H "Authorization: Bearer $OBSIDIAN_API_KEY" \
@@ -138,6 +145,7 @@ curl -k -X PATCH -H "Authorization: Bearer $OBSIDIAN_API_KEY" \
 ```
 
 ### Periodic Notes
+
 ```bash
 # Get today's daily note
 curl -k -H "Authorization: Bearer $OBSIDIAN_API_KEY" \
@@ -153,6 +161,7 @@ curl -k -X POST -H "Authorization: Bearer $OBSIDIAN_API_KEY" \
 Periods: `daily`, `weekly`, `monthly`, `quarterly`, `yearly`
 
 ### Search
+
 ```bash
 # Simple text search
 curl -k -X POST -H "Authorization: Bearer $OBSIDIAN_API_KEY" \
@@ -172,6 +181,7 @@ curl -k -X POST -H "Authorization: Bearer $OBSIDIAN_API_KEY" \
 ```
 
 ### Commands
+
 ```bash
 # List commands
 curl -k -H "Authorization: Bearer $OBSIDIAN_API_KEY" \
@@ -183,6 +193,7 @@ curl -k -X POST -H "Authorization: Bearer $OBSIDIAN_API_KEY" \
 ```
 
 ### Open in Obsidian
+
 ```bash
 curl -k -X POST -H "Authorization: Bearer $OBSIDIAN_API_KEY" \
   "https://127.0.0.1:27124/open/path/to/note.md"

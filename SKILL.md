@@ -89,16 +89,16 @@ grep -r "term" "$OBSIDIAN_VAULT_PATH" --include="*.md"
 
 ## Decision Guide
 
-| Need | Method |
-|------|--------|
-| Fast read/write | Filesystem |
-| Quick thoughts/notes | `thought` CLI |
-| Task management | `todo` CLI |
-| Oncall/incidents | `oncall` CLI |
-| Search by frontmatter | REST API |
-| Dataview queries | REST API |
-| Execute commands | REST API |
-| No Obsidian running | Filesystem |
+| Need                  | Method        |
+| --------------------- | ------------- |
+| Fast read/write       | Filesystem    |
+| Quick thoughts/notes  | `thought` CLI |
+| Task management       | `todo` CLI    |
+| Oncall/incidents      | `oncall` CLI  |
+| Search by frontmatter | REST API      |
+| Dataview queries      | REST API      |
+| Execute commands      | REST API      |
+| No Obsidian running   | Filesystem    |
 
 ## Reference Docs
 

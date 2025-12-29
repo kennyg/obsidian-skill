@@ -41,6 +41,7 @@ export OBSIDIAN_DAILY_FORMAT="Journal/Daily/%Y-%m-%d.md"
 ```
 
 Format tokens:
+
 - `%Y` - Year (2025)
 - `%m` - Month (01-12)
 - `%d` - Day (01-31)

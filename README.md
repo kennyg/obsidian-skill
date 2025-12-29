@@ -23,10 +23,10 @@ Read, write, search, and manage Obsidian vault notes without MCP overhead. Direc
 
 ### For Scripts
 
-| Script | Requires |
-|--------|----------|
+| Script               | Requires                                                             |
+| -------------------- | -------------------------------------------------------------------- |
 | `obsidian-client.ts` | [Bun](https://bun.sh/) - `curl -fsSL https://bun.sh/install \| bash` |
-| `obsidian.sh` | `curl`, `jq` - `brew install jq` |
+| `obsidian.sh`        | `curl`, `jq` - `brew install jq`                                     |
 
 ## Setup
 
@@ -86,6 +86,7 @@ bun scripts/oncall.ts list
 ```
 
 Files:
+
 ```
 Journal/Oncall/
 ├── current-shift.md          # Active shift

@@ -8,15 +8,15 @@ Lightweight incident logging with multi-day shift support.
 bun scripts/oncall.ts <command> [args]
 ```
 
-| Command | Description |
-|---------|-------------|
-| `start` | Start a new oncall shift |
-| `end` | End current shift and archive |
-| `log <msg> [tags...]` | Log an incident |
+| Command                   | Description                            |
+| ------------------------- | -------------------------------------- |
+| `start`                   | Start a new oncall shift               |
+| `end`                     | End current shift and archive          |
+| `log <msg> [tags...]`     | Log an incident                        |
 | `resolve <msg> [tags...]` | Log a resolution (auto-adds #resolved) |
-| `summary` | Show current shift summary with stats |
-| `search <query>` | Search oncall logs |
-| `list` | List recent shifts |
+| `summary`                 | Show current shift summary with stats  |
+| `search <query>`          | Search oncall logs                     |
+| `list`                    | List recent shifts                     |
 
 ## Examples
 
@@ -71,13 +71,13 @@ status: ended
 
 ## Frontmatter Fields
 
-| Field | Description |
-|-------|-------------|
+| Field       | Description                   |
+| ----------- | ----------------------------- |
 | `startDate` | Shift start date (YYYY-MM-DD) |
-| `startTime` | Shift start time (HH:MM) |
-| `endDate` | Shift end date |
-| `endTime` | Shift end time |
-| `status` | `active` or `ended` |
+| `startTime` | Shift start time (HH:MM)      |
+| `endDate`   | Shift end date                |
+| `endTime`   | Shift end time                |
+| `status`    | `active` or `ended`           |
 
 ## Querying with Dataview
 

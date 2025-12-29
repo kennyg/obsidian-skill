@@ -3,6 +3,11 @@ import "package://github.com/jdx/hk/releases/download/v1.28.0/hk@1.28.0#/Builtin
 
 local linters = new Mapping<String, Step> {
     ["oxlint"] = Builtins.ox_lint
+    ["oxfmt"] {
+        glob = "**/*.{ts,tsx,js,jsx,json,md}"
+        check = "oxfmt --check {{files}}"
+        fix = "oxfmt {{files}}"
+    }
     ["shfmt"] = Builtins.shfmt
     ["typos"] = Builtins.typos
     ["trailing-whitespace"] = Builtins.trailing_whitespace
