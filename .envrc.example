@@ -1,0 +1,13 @@
+# Obsidian Skill Configuration
+# Copy to .envrc and fill in your values, then run: direnv allow
+
+# Required: Path to your Obsidian vault
+export OBSIDIAN_VAULT_PATH="/path/to/your/vault"
+
+# Required for REST API: Get from Obsidian Settings → Local REST API → API Key
+export OBSIDIAN_API_KEY="your-api-key-here"
+
+# Optional: REST API connection settings (defaults shown)
+# export OBSIDIAN_HOST="127.0.0.1"
+# export OBSIDIAN_PORT="27124"
+# export OBSIDIAN_HTTPS="true"

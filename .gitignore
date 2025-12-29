@@ -1,0 +1,6 @@
+# Secrets
+.envrc
+.env
+
+# OS
+.DS_Store
