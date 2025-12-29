@@ -129,6 +129,10 @@ The [obsidian-mcp-tools](https://github.com/jacksteamdev/obsidian-mcp-tools) plu
 3. **Typed client** - Full TypeScript/Bun client with autocomplete
 4. **Simpler debugging** - Direct HTTP calls are easier to trace
 
+## Acknowledgements
+
+Inspired by [Connect Claude AI with Obsidian](https://dev.to/sroy8091/connect-claude-ai-with-obsidian-a-game-changer-for-knowledge-management-25o2) by Sumit Roy.
+
 ## License
 
 MIT
