@@ -19,6 +19,7 @@ Read, write, search, and manage Obsidian vault notes without MCP overhead. Direc
 - **[Dataview Plugin](https://github.com/blacksmithgu/obsidian-dataview)** - For Dataview DQL queries via API
 - **[Periodic Notes Plugin](https://github.com/liamcain/obsidian-periodic-notes)** - For daily/weekly/monthly notes API
 - **[Templater Plugin](https://github.com/SilentVoid13/Templater)** - For template execution
+- **[Tasks Plugin](https://github.com/obsidian-tasks-group/obsidian-tasks)** - For task queries (used by `todo.ts`)
 
 ### For Scripts
 
