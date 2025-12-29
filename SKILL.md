@@ -1,333 +1,83 @@
 ---
 name: obsidian
-description: "Read, write, search, and manage Obsidian vault notes. Use when: (1) Reading/writing markdown notes, (2) Searching vault content, (3) Managing daily/periodic notes, (4) Executing Obsidian commands. Supports both direct filesystem access and Local REST API."
+description: "Read, write, search, and manage Obsidian vault notes. Use when: (1) Reading/writing markdown notes, (2) Searching vault content, (3) Managing daily/periodic notes, (4) Tracking tasks or oncall incidents. Supports filesystem access and Local REST API."
 ---
 
 # Obsidian Vault Integration
 
 ## Configuration
 
-Set these environment variables (recommended via `.envrc` with direnv):
-
 ```bash
-# .envrc
 export OBSIDIAN_VAULT_PATH="/path/to/your/vault"
-export OBSIDIAN_API_KEY="your-api-key-here"
-
-# Optional REST API config
-export OBSIDIAN_HOST="127.0.0.1"
-export OBSIDIAN_PORT="27124"
-export OBSIDIAN_HTTPS="true"
+export OBSIDIAN_API_KEY="your-api-key-here"           # From: Obsidian Settings → Local REST API
+export OBSIDIAN_DAILY_FORMAT="Journal/Daily/%Y-%m-%d.md"  # Optional
+export OBSIDIAN_TODO_FILE="Inbox/Tasks.md"            # Optional
 ```
 
-Get your API key from: Obsidian Settings → Community Plugins → Local REST API → Copy API Key
+## CLI Tools
 
-## Access Methods
-
-Two methods available, choose based on context:
-
-1. **Direct Filesystem** - When vault path accessible (fastest, no dependencies)
-2. **Local REST API** - When Obsidian app features needed (search, commands, active file)
-
-## Method 1: Direct Filesystem Access
-
-Use when Claude has filesystem tools and `$OBSIDIAN_VAULT_PATH` is set.
-
-### Read Note
-```bash
-cat "$OBSIDIAN_VAULT_PATH/folder/note.md"
-```
-
-### Write/Create Note
-```bash
-cat > "$OBSIDIAN_VAULT_PATH/folder/note.md" << 'EOF'
----
-title: My Note
-tags: [tag1, tag2]
-created: 2025-01-15
----
-
-# Content here
-EOF
-```
-
-### Search Notes
-```bash
-# Find by filename
-find "$OBSIDIAN_VAULT_PATH" -name "*.md" | xargs grep -l "search term"
-
-# Search content with context
-grep -r -n "search term" "$OBSIDIAN_VAULT_PATH" --include="*.md"
-
-# Find by tag in frontmatter
-grep -r -l "tags:.*mytag" "$OBSIDIAN_VAULT_PATH" --include="*.md"
-```
-
-### List Structure
-```bash
-find "$OBSIDIAN_VAULT_PATH" -name "*.md" -type f | head -50
-```
-
-## Method 2: Local REST API
-
-Requires [Local REST API plugin](https://github.com/coddingtonbear/obsidian-local-rest-api). Use when needing: active file, commands, Dataview queries, or when filesystem unavailable.
-
-**Base URL**: `https://127.0.0.1:27124` (HTTPS) or `http://127.0.0.1:27123` (HTTP)
-
-### Core Endpoints
-
-#### List Vault Files
-```bash
-curl -k -H "Authorization: Bearer $OBSIDIAN_API_KEY" \
-  "https://127.0.0.1:27124/vault/"
-```
-
-#### Read Note
-```bash
-# As markdown
-curl -k -H "Authorization: Bearer $OBSIDIAN_API_KEY" \
-  "https://127.0.0.1:27124/vault/path/to/note.md"
-
-# As JSON with metadata
-curl -k -H "Authorization: Bearer $OBSIDIAN_API_KEY" \
-  -H "Accept: application/vnd.olrapi.note+json" \
-  "https://127.0.0.1:27124/vault/path/to/note.md"
-```
-
-#### Create/Update Note
-```bash
-curl -k -X PUT -H "Authorization: Bearer $OBSIDIAN_API_KEY" \
-  -H "Content-Type: text/markdown" \
-  -d "# New Note Content" \
-  "https://127.0.0.1:27124/vault/path/to/note.md"
-```
-
-#### Append to Note
-```bash
-curl -k -X POST -H "Authorization: Bearer $OBSIDIAN_API_KEY" \
-  -H "Content-Type: text/markdown" \
-  -d "## Appended Section" \
-  "https://127.0.0.1:27124/vault/path/to/note.md"
-```
-
-#### Patch Note (insert at heading/block/frontmatter)
-```bash
-# Append under a heading
-curl -k -X PATCH -H "Authorization: Bearer $OBSIDIAN_API_KEY" \
-  -H "Content-Type: text/markdown" \
-  -H "Operation: append" \
-  -H "Target-Type: heading" \
-  -H "Target: Section Name" \
-  -d "Content to insert" \
-  "https://127.0.0.1:27124/vault/path/to/note.md"
-
-# Update frontmatter field
-curl -k -X PATCH -H "Authorization: Bearer $OBSIDIAN_API_KEY" \
-  -H "Content-Type: application/json" \
-  -H "Operation: replace" \
-  -H "Target-Type: frontmatter" \
-  -H "Target: status" \
-  -d '"completed"' \
-  "https://127.0.0.1:27124/vault/path/to/note.md"
-```
-
-#### Delete Note
-```bash
-curl -k -X DELETE -H "Authorization: Bearer $OBSIDIAN_API_KEY" \
-  "https://127.0.0.1:27124/vault/path/to/note.md"
-```
-
-### Active File Operations
+### Filesystem (obsidian.sh)
 
 ```bash
-# Get currently open file
-curl -k -H "Authorization: Bearer $OBSIDIAN_API_KEY" \
-  "https://127.0.0.1:27124/active/"
-
-# Append to active file
-curl -k -X POST -H "Authorization: Bearer $OBSIDIAN_API_KEY" \
-  -H "Content-Type: text/markdown" \
-  -d "New content" \
-  "https://127.0.0.1:27124/active/"
-```
-
-### Periodic Notes
-
-```bash
-# Get today's daily note
-curl -k -H "Authorization: Bearer $OBSIDIAN_API_KEY" \
-  "https://127.0.0.1:27124/periodic/daily/"
-
-# Get specific date's note
-curl -k -H "Authorization: Bearer $OBSIDIAN_API_KEY" \
-  "https://127.0.0.1:27124/periodic/daily/2025/1/15/"
-
-# Append to daily note (creates if needed)
-curl -k -X POST -H "Authorization: Bearer $OBSIDIAN_API_KEY" \
-  -H "Content-Type: text/markdown" \
-  -d "- Task completed at $(date)" \
-  "https://127.0.0.1:27124/periodic/daily/"
-```
-
-Periods: `daily`, `weekly`, `monthly`, `quarterly`, `yearly`
-
-### Oncall Tracking
-
-Lightweight incident logging with multi-day shift support using Bun CLI.
-
-```bash
-# Start/end oncall shift
-bun scripts/oncall.ts start
-bun scripts/oncall.ts end
-
-# Log incidents with tags
-bun scripts/oncall.ts log "PagerDuty alert for db-prod-01" incident database
-
-# Log resolutions (auto-adds #resolved tag)
-bun scripts/oncall.ts resolve "Increased connection pool" database
-
-# View current shift summary with stats
-bun scripts/oncall.ts summary
-
-# Search oncall logs
-bun scripts/oncall.ts search database
-bun scripts/oncall.ts search incident
-
-# List recent shifts
-bun scripts/oncall.ts list
-```
-
-File structure:
-
-```
-Journal/Oncall/
-├── current-shift.md              # Active shift (created by start)
-└── archive/
-    ├── 2025-12-29.md             # Single-day shift
-    └── 2025-12-25-to-2025-12-27.md  # Multi-day shift
-```
-
-Shift format with frontmatter:
-
-```markdown
----
-startDate: 2025-12-29
-startTime: 09:00
-endDate: 2025-12-29
-endTime: 17:00
-status: ended
----
-
-## Oncall Shift (2025-12-29)
-> Started: 09:00
-- 09:15 PagerDuty alert for db-prod-01 #incident #database
-- 09:45 ✓ Increased connection pool #resolved #database
-> Ended: 17:00
-```
-
-Query shifts with Dataview:
-
-```bash
-curl -k -X POST -H "Authorization: Bearer $OBSIDIAN_API_KEY" \
-  -H "Content-Type: application/vnd.olrapi.dataview.dql+txt" \
-  -d 'TABLE startDate, endDate FROM "Journal/Oncall/archive" WHERE status = "ended" SORT startDate DESC' \
-  "https://127.0.0.1:27124/search/"
+./scripts/obsidian.sh fs-read <path>            # Read note
+./scripts/obsidian.sh fs-write <path> <content> # Write note
+./scripts/obsidian.sh fs-list [dir]             # List .md files
+./scripts/obsidian.sh fs-search <query>         # Grep search
+./scripts/obsidian.sh fs-daily-append <content> # Append to daily note
 ```
 
 ### Todo Tracking
 
-Task management using [Obsidian Tasks](https://github.com/obsidian-tasks-group/obsidian-tasks) format.
+```bash
+todo add "Review PR" work --due tomorrow --priority high
+todo done 1                    # Complete by number
+todo done "PR"                 # Complete by search
+todo delete 2                  # Remove task
+todo list                      # Show pending
+todo list work                 # Filter by tag
+```
+
+See: [references/todo.md](references/todo.md)
+
+### Oncall Tracking
 
 ```bash
-# Add tasks with tags, priority, and due dates
-bun scripts/todo.ts add "Review PR" work --due tomorrow --priority high
-bun scripts/todo.ts add "Buy groceries" personal errands
-
-# Complete or delete tasks by number or search
-bun scripts/todo.ts done 1
-bun scripts/todo.ts done "PR"
-bun scripts/todo.ts delete 2
-
-# List and filter
-bun scripts/todo.ts list
-bun scripts/todo.ts list work
-bun scripts/todo.ts all
+oncall start                   # Start shift
+oncall log "Alert fired" incident database
+oncall resolve "Fixed it" database
+oncall summary                 # View current shift
+oncall end                     # End and archive
 ```
 
-File location: `Inbox/Tasks.md` (configurable via `OBSIDIAN_TODO_FILE`)
+See: [references/oncall.md](references/oncall.md)
 
-Task format:
-```markdown
-- [ ] Review PR #work ⏫ 📅 2025-12-30 ➕ 2025-12-29
-- [ ] Buy groceries #personal #errands ➕ 2025-12-29
-- [x] Old task ➕ 2025-12-28 ✅ 2025-12-29
-```
-
-Emojis:
-- `⏫` high / `🔼` medium / `🔽` low priority
-- `📅` due date
-- `➕` created date
-- `✅` completion date
-
-### Search
-
-#### Simple Text Search
-```bash
-curl -k -X POST -H "Authorization: Bearer $OBSIDIAN_API_KEY" \
-  "https://127.0.0.1:27124/search/simple/?query=search+term&contextLength=100"
-```
-
-#### JsonLogic Search
-```bash
-# Find notes with specific tag
-curl -k -X POST -H "Authorization: Bearer $OBSIDIAN_API_KEY" \
-  -H "Content-Type: application/vnd.olrapi.jsonlogic+json" \
-  -d '{"in": ["project", {"var": "tags"}]}' \
-  "https://127.0.0.1:27124/search/"
-
-# Find by frontmatter field
-curl -k -X POST -H "Authorization: Bearer $OBSIDIAN_API_KEY" \
-  -H "Content-Type: application/vnd.olrapi.jsonlogic+json" \
-  -d '{"==": [{"var": "frontmatter.status"}, "active"]}' \
-  "https://127.0.0.1:27124/search/"
-```
-
-#### Dataview Query (requires Dataview plugin)
-```bash
-curl -k -X POST -H "Authorization: Bearer $OBSIDIAN_API_KEY" \
-  -H "Content-Type: application/vnd.olrapi.dataview.dql+txt" \
-  -d 'TABLE file.mtime AS "Modified" FROM "Projects" SORT file.mtime DESC LIMIT 10' \
-  "https://127.0.0.1:27124/search/"
-```
-
-### Commands
+### REST API (obsidian.sh)
 
 ```bash
-# List available commands
-curl -k -H "Authorization: Bearer $OBSIDIAN_API_KEY" \
-  "https://127.0.0.1:27124/commands/"
-
-# Execute command
-curl -k -X POST -H "Authorization: Bearer $OBSIDIAN_API_KEY" \
-  "https://127.0.0.1:27124/commands/daily-notes:goto-today/"
+./scripts/obsidian.sh status              # Check connection
+./scripts/obsidian.sh read <path>         # Read via API
+./scripts/obsidian.sh write <path> <content>
+./scripts/obsidian.sh daily               # Get daily note
+./scripts/obsidian.sh daily-append <content>
+./scripts/obsidian.sh search <query>      # Simple search
 ```
 
-### Open File in Obsidian UI
+See: [references/api-reference.md](references/api-reference.md)
+
+## Quick Filesystem Access
+
 ```bash
-curl -k -X POST -H "Authorization: Bearer $OBSIDIAN_API_KEY" \
-  "https://127.0.0.1:27124/open/path/to/note.md"
-```
+# Read
+cat "$OBSIDIAN_VAULT_PATH/folder/note.md"
 
-## Programmatic Access
+# Write
+cat > "$OBSIDIAN_VAULT_PATH/folder/note.md" << 'EOF'
+# My Note
+Content here
+EOF
 
-See `scripts/obsidian-client.ts` for a typed Bun/TypeScript client.
-
-```typescript
-import { ObsidianClient } from './scripts/obsidian-client.ts';
-
-const client = new ObsidianClient(); // Uses OBSIDIAN_API_KEY env var
-const note = await client.getNote('Projects/my-project.md');
-await client.appendToDaily('- Completed task');
+# Search
+grep -r "term" "$OBSIDIAN_VAULT_PATH" --include="*.md"
 ```
 
 ## Decision Guide
@@ -335,11 +85,16 @@ await client.appendToDaily('- Completed task');
 | Need | Method |
 |------|--------|
 | Fast read/write | Filesystem |
-| Search by tag/frontmatter | REST API (JsonLogic) |
+| Task management | `todo` CLI |
+| Oncall/incidents | `oncall` CLI |
+| Daily note append | `fs-daily-append` |
+| Search by frontmatter | REST API |
 | Dataview queries | REST API |
-| Active file operations | REST API |
-| Daily/periodic notes | REST API |
-| Execute Obsidian commands | REST API |
-| Oncall/incident tracking | `bun scripts/oncall.ts` |
-| Task management | `bun scripts/todo.ts` |
+| Execute commands | REST API |
 | No Obsidian running | Filesystem |
+
+## Reference Docs
+
+- [API Reference](references/api-reference.md) - REST API endpoints and curl examples
+- [Todo Reference](references/todo.md) - Task management with Obsidian Tasks format
+- [Oncall Reference](references/oncall.md) - Incident tracking and shift management
