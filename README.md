@@ -131,14 +131,15 @@ Add to `.zshrc` or `.bashrc`:
 # Quick oncall commands
 alias oncall="bun /path/to/obsidian-skill/scripts/oncall.ts"
 
-# Log thoughts to daily note with timestamp (requires Obsidian running)
+# Log thoughts to daily note with timestamp (auto-detects if Obsidian is running)
 thought() {
-  /path/to/obsidian-skill/scripts/obsidian.sh daily-append "- $(date +%H:%M) $*"
-}
-
-# Offline version (writes directly to filesystem)
-thought() {
-  /path/to/obsidian-skill/scripts/obsidian.sh fs-daily-append "- $(date +%H:%M) $*"
+  local script="/path/to/obsidian-skill/scripts/obsidian.sh"
+  local content="- $(date +%H:%M) $*"
+  if "$script" status &>/dev/null; then
+    "$script" daily-append "$content"
+  else
+    "$script" fs-daily-append "$content"
+  fi
 }
 ```
 
