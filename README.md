@@ -144,6 +144,43 @@ Tasks are stored in `Inbox/Tasks.md` (configurable via `OBSIDIAN_TODO_FILE`):
 - [x] Old task #done ➕ 2025-12-28 ✅ 2025-12-29
 ```
 
+## Agent Mission Control
+
+A kanban board as a task queue — dispatch work to agents, let them claim and update cards, see status live in Obsidian.
+
+```bash
+# Check what's available
+bun scripts/kanban.ts board-status --board "Agents/Mission-Control.md"
+bun scripts/kanban.ts list --board "Agents/Mission-Control.md" --lane Ready
+
+# Claim a task and start working
+bun scripts/kanban.ts claim --board "Agents/Mission-Control.md" --id abc123def --agent claude-1
+
+# Update status while in progress
+bun scripts/kanban.ts update --board "Agents/Mission-Control.md" --id abc123def --status blocked --note "Need API key"
+
+# Finish
+bun scripts/kanban.ts complete --board "Agents/Mission-Control.md" --id abc123def
+bun scripts/kanban.ts fail --board "Agents/Mission-Control.md" --id abc123def --reason "Build failed"
+
+# Dispatch new tasks
+bun scripts/kanban.ts add-task --board "Agents/Mission-Control.md" --title "Refactor auth" --lane Ready --priority high
+```
+
+Cards track agent, status, priority, and timestamps as inline metadata badges:
+
+```markdown
+- [ ] Refactor auth module [agent::claude-1] [status::in-progress] [priority::high] #agent-task #in-progress ^abc123def
+```
+
+Lanes: `Backlog → Ready → In Progress → Blocked → Done → Failed`
+
+Enable the CSS snippet for color-coded status borders:
+
+```bash
+obsidian snippet:enable name=agent-mission-control
+```
+
 ## Why Not MCP?
 
 The [obsidian-mcp-tools](https://github.com/jacksteamdev/obsidian-mcp-tools) plugin is just a thin wrapper around the Local REST API. This skill gives you:

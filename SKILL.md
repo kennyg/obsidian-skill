@@ -58,6 +58,20 @@ oncall end                     # End and archive
 
 See: [references/oncall.md](references/oncall.md)
 
+### Agent Mission Control (Kanban)
+
+```bash
+bun scripts/kanban.ts board-status --board "Agents/Mission-Control.md"
+bun scripts/kanban.ts list --board "Agents/Mission-Control.md" --lane Ready
+bun scripts/kanban.ts claim --board "Agents/Mission-Control.md" --id <blockId> --agent <name>
+bun scripts/kanban.ts update --board "Agents/Mission-Control.md" --id <blockId> --status blocked
+bun scripts/kanban.ts complete --board "Agents/Mission-Control.md" --id <blockId>
+bun scripts/kanban.ts fail --board "Agents/Mission-Control.md" --id <blockId> --reason "..."
+bun scripts/kanban.ts add-task --board "Agents/Mission-Control.md" --title "..." --lane Ready
+```
+
+See: [references/kanban.md](references/kanban.md)
+
 ### REST API (obsidian.sh)
 
 ```bash
@@ -89,16 +103,17 @@ grep -r "term" "$OBSIDIAN_VAULT_PATH" --include="*.md"
 
 ## Decision Guide
 
-| Need                  | Method        |
-| --------------------- | ------------- |
-| Fast read/write       | Filesystem    |
-| Quick thoughts/notes  | `thought` CLI |
-| Task management       | `todo` CLI    |
-| Oncall/incidents      | `oncall` CLI  |
-| Search by frontmatter | REST API      |
-| Dataview queries      | REST API      |
-| Execute commands      | REST API      |
-| No Obsidian running   | Filesystem    |
+| Need                      | Method        |
+| ------------------------- | ------------- |
+| Fast read/write           | Filesystem    |
+| Quick thoughts/notes      | `thought` CLI |
+| Task management           | `todo` CLI    |
+| Oncall/incidents          | `oncall` CLI  |
+| Agent task dispatch/claim | `kanban` CLI  |
+| Search by frontmatter     | REST API      |
+| Dataview queries          | REST API      |
+| Execute commands          | REST API      |
+| No Obsidian running       | Filesystem    |
 
 ## Reference Docs
 
@@ -106,3 +121,4 @@ grep -r "term" "$OBSIDIAN_VAULT_PATH" --include="*.md"
 - [Thought Reference](references/thought.md) - Quick notes to daily journal
 - [Todo Reference](references/todo.md) - Task management with Obsidian Tasks format
 - [Oncall Reference](references/oncall.md) - Incident tracking and shift management
+- [Kanban Reference](references/kanban.md) - Agent mission control and task dispatch
