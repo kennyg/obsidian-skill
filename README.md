@@ -199,6 +199,14 @@ oncall log "Server alert" incident
 oncall end
 ```
 
+## References
+
+- [Obsidian CLI](references/obsidian-cli.md) - Native CLI command reference
+- [Thought](references/thought.md) - Quick notes to daily journal
+- [Todo](references/todo.md) - Task management with Obsidian Tasks format
+- [Oncall](references/oncall.md) - Incident tracking and shift management
+- [Kanban](references/kanban.md) - Agent mission control and task dispatch
+
 ## Acknowledgements
 
 Inspired by [Connect Claude AI with Obsidian](https://dev.to/sroy8091/connect-claude-ai-with-obsidian-a-game-changer-for-knowledge-management-25o2) by Sumit Roy.
