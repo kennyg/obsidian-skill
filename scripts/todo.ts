@@ -8,17 +8,12 @@
  * Usage: bun todo.ts <command> [args]
  */
 
-import { exists, mkdir } from "fs/promises";
-import { join } from "path";
+import { $ } from "bun";
 
-const VAULT_PATH = process.env.OBSIDIAN_VAULT_PATH;
-if (!VAULT_PATH) {
-  console.error("Error: OBSIDIAN_VAULT_PATH not set");
-  process.exit(1);
-}
+const VAULT = process.env.OBSIDIAN_VAULT;
+const vaultArg = VAULT ? [`vault=${VAULT}`] : [];
 
 const TODO_FILE = process.env.OBSIDIAN_TODO_FILE || "Inbox/Tasks.md";
-const FULL_PATH = join(VAULT_PATH, TODO_FILE);
 
 // Task plugin emoji format
 const EMOJI = {
@@ -87,11 +82,9 @@ function parseTask(line: string, lineNum: number): Task | null {
 }
 
 async function readTasks(): Promise<{ tasks: Task[]; lines: string[] }> {
-  if (!(await exists(FULL_PATH))) {
-    return { tasks: [], lines: [] };
-  }
+  const content = await $`obsidian read path=${TODO_FILE} ${vaultArg}`.text();
+  if (content.startsWith("Error:")) return { tasks: [], lines: [] };
 
-  const content = await Bun.file(FULL_PATH).text();
   // Remove trailing newline before splitting to avoid empty last element
   const lines = content.replace(/\n$/, "").split("\n");
   const tasks: Task[] = [];
@@ -105,10 +98,9 @@ async function readTasks(): Promise<{ tasks: Task[]; lines: string[] }> {
 }
 
 async function writeTasks(lines: string[]): Promise<void> {
-  await mkdir(join(VAULT_PATH, TODO_FILE.split("/").slice(0, -1).join("/")), { recursive: true });
   // Filter empty lines, add trailing newline
   const cleaned = lines.filter((l) => l.trim());
-  await Bun.write(FULL_PATH, cleaned.join("\n") + "\n");
+  await $`obsidian create path=${TODO_FILE} content=${cleaned.join("\n") + "\n"} overwrite ${vaultArg}`.quiet();
 }
 
 async function add(
@@ -368,7 +360,7 @@ Examples:
   bun todo.ts list work
   bun todo.ts all
 
-File: ${TODO_FILE}
+File: ${TODO_FILE}${VAULT ? ` (vault: ${VAULT})` : ""}
 `);
   process.exit(command ? 1 : 0);
 }

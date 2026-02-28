@@ -5,16 +5,10 @@
  * Usage: bun thought.ts <message> [tags...]
  */
 
-import { exists, mkdir } from "fs/promises";
-import { join, dirname } from "path";
+import { $ } from "bun";
 
-const VAULT_PATH = process.env.OBSIDIAN_VAULT_PATH;
-if (!VAULT_PATH) {
-  console.error("Error: OBSIDIAN_VAULT_PATH not set");
-  process.exit(1);
-}
-
-const DAILY_FORMAT = process.env.OBSIDIAN_DAILY_FORMAT || "Journal/%Y-%m-%d.md";
+const VAULT = process.env.OBSIDIAN_VAULT;
+const vaultArg = VAULT ? [`vault=${VAULT}`] : [];
 
 function formatTime(): string {
   return new Date().toLocaleTimeString("en-US", {
@@ -22,33 +16,6 @@ function formatTime(): string {
     minute: "2-digit",
     hour12: false,
   });
-}
-
-function formatDailyPath(): string {
-  const now = new Date();
-  return DAILY_FORMAT.replace("%Y", now.getFullYear().toString())
-    .replace("%m", (now.getMonth() + 1).toString().padStart(2, "0"))
-    .replace("%d", now.getDate().toString().padStart(2, "0"));
-}
-
-async function append(content: string): Promise<void> {
-  const dailyPath = join(VAULT_PATH, formatDailyPath());
-
-  await mkdir(dirname(dailyPath), { recursive: true });
-
-  // Ensure file ends with newline before appending
-  if (await exists(dailyPath)) {
-    const file = Bun.file(dailyPath);
-    const text = await file.text();
-    if (text.length > 0 && !text.endsWith("\n")) {
-      await Bun.write(dailyPath, text + "\n");
-    }
-  }
-
-  await Bun.write(
-    dailyPath,
-    ((await exists(dailyPath)) ? await Bun.file(dailyPath).text() : "") + content + "\n",
-  );
 }
 
 // === CLI ===
@@ -68,8 +35,6 @@ Examples:
 
 Output format:
   - HH:MM <message> #tag1 #tag2
-
-File: ${formatDailyPath()}
 `);
   process.exit(0);
 }
@@ -79,5 +44,5 @@ const tags = args.slice(1);
 const tagStr = tags.length ? " " + tags.map((t) => `#${t}`).join(" ") : "";
 const entry = `- ${formatTime()} ${message}${tagStr}`;
 
-await append(entry);
+await $`obsidian daily:append content=${entry} ${vaultArg}`.quiet();
 console.log(`Added: ${entry}`);
