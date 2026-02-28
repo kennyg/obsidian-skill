@@ -11,14 +11,10 @@
  * Usage: bun kanban.ts <command> [args]
  */
 
-import { join, dirname } from "path";
-import { mkdir } from "fs/promises";
+import { $ } from "bun";
 
-const VAULT_PATH = process.env.OBSIDIAN_VAULT_PATH;
-if (!VAULT_PATH) {
-  console.error("Error: OBSIDIAN_VAULT_PATH not set");
-  process.exit(1);
-}
+const VAULT = process.env.OBSIDIAN_VAULT;
+const vaultArg = VAULT ? [`vault=${VAULT}`] : [];
 
 // === Data Structures ===
 
@@ -43,7 +39,7 @@ interface KanbanLane {
 interface KanbanBoard {
   lanes: KanbanLane[];
   rawLines: string[];
-  filePath: string;
+  boardPath: string;
 }
 
 // === Parsing ===
@@ -89,8 +85,7 @@ function parseItem(line: string, lineIndex: number, laneTitle: string): KanbanIt
 }
 
 async function readBoard(boardPath: string): Promise<KanbanBoard> {
-  const fullPath = join(VAULT_PATH, boardPath);
-  const content = await Bun.file(fullPath).text();
+  const content = await $`obsidian read path=${boardPath} ${vaultArg}`.text();
   const rawLines = content.replace(/\n$/, "").split("\n");
 
   const lanes: KanbanLane[] = [];
@@ -126,12 +121,12 @@ async function readBoard(boardPath: string): Promise<KanbanBoard> {
     lanes.push(currentLane);
   }
 
-  return { lanes, rawLines, filePath: fullPath };
+  return { lanes, rawLines, boardPath };
 }
 
 async function writeBoard(board: KanbanBoard): Promise<void> {
-  await mkdir(dirname(board.filePath), { recursive: true });
-  await Bun.write(board.filePath, board.rawLines.join("\n") + "\n");
+  const content = board.rawLines.join("\n") + "\n";
+  await $`obsidian create path=${board.boardPath} content=${content} overwrite ${vaultArg}`.quiet();
 }
 
 function generateBlockId(prefix?: string): string {
@@ -561,7 +556,7 @@ Examples:
   bun kanban.ts add-task --board "Agents/Mission-Control.md" --title "Refactor auth module" --lane Backlog --priority high
 
 Environment:
-  OBSIDIAN_VAULT_PATH   Path to Obsidian vault (required)
+  OBSIDIAN_VAULT   Vault name to target (optional, defaults to active vault)
 `);
   process.exit(command ? 1 : 0);
 }
