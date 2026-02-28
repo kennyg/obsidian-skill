@@ -161,7 +161,7 @@ function buildItemLine(
   updates: { fields?: Record<string, string>; tags?: string[]; checked?: boolean },
 ): string {
   const checked = updates.checked !== undefined ? updates.checked : item.checked;
-  const fields = { ...item.fields, ...(updates.fields || {}) };
+  const fields = { ...item.fields, ...updates.fields };
   const tags = updates.tags !== undefined ? updates.tags : item.tags;
 
   let line = `- [${checked ? "x" : " "}] ${item.text}`;
