@@ -1,6 +1,6 @@
 ---
 name: obsidian
-description: "Read, write, search, and manage Obsidian vault notes. Use when: (1) Reading/writing markdown notes, (2) Searching vault content, (3) Managing daily/periodic notes, (4) Tracking tasks or oncall incidents. Supports filesystem access and Local REST API."
+description: "Read, write, search, and manage Obsidian vault notes. Use when: (1) Reading/writing markdown notes, (2) Searching vault content, (3) Managing daily/periodic notes, (4) Tracking tasks or oncall incidents. Uses the native Obsidian CLI."
 ---
 
 # Obsidian Vault Integration
@@ -8,22 +8,23 @@ description: "Read, write, search, and manage Obsidian vault notes. Use when: (1
 ## Configuration
 
 ```bash
-export OBSIDIAN_VAULT_PATH="/path/to/your/vault"
-export OBSIDIAN_API_KEY="your-api-key-here"           # From: Obsidian Settings → Local REST API
-export OBSIDIAN_DAILY_FORMAT="Journal/Daily/%Y-%m-%d.md"  # Optional
-export OBSIDIAN_TODO_FILE="Inbox/Tasks.md"            # Optional
+export OBSIDIAN_VAULT="icloud-vault"            # Optional — defaults to active vault
+export OBSIDIAN_TODO_FILE="Inbox/Tasks.md"      # Optional
 ```
 
 ## CLI Tools
 
-### Filesystem (obsidian.sh)
+### Native Obsidian CLI
 
 ```bash
-./scripts/obsidian.sh fs-read <path>            # Read note
-./scripts/obsidian.sh fs-write <path> <content> # Write note
-./scripts/obsidian.sh fs-list [dir]             # List .md files
-./scripts/obsidian.sh fs-search <query>         # Grep search
-./scripts/obsidian.sh fs-daily-append <content> # Append to daily note
+obsidian read path=<path>                       # Read note
+obsidian create path=<path> content=<text> overwrite  # Write note
+obsidian search query=<text>                    # Search vault
+obsidian daily:read                             # Read daily note
+obsidian daily:append content=<text>            # Append to daily note
+obsidian command id=<id>                        # Execute command
+obsidian snippet:enable name=<name>             # Enable CSS snippet
+obsidian files                                  # List vault files
 ```
 
 ### Thought (Daily Notes)
@@ -72,52 +73,20 @@ bun scripts/kanban.ts add-task --board "Agents/Mission-Control.md" --title "..."
 
 See: [references/kanban.md](references/kanban.md)
 
-### REST API (obsidian.sh)
-
-```bash
-./scripts/obsidian.sh status              # Check connection
-./scripts/obsidian.sh read <path>         # Read via API
-./scripts/obsidian.sh write <path> <content>
-./scripts/obsidian.sh daily               # Get daily note
-./scripts/obsidian.sh daily-append <content>
-./scripts/obsidian.sh search <query>      # Simple search
-```
-
-See: [references/api-reference.md](references/api-reference.md)
-
-## Quick Filesystem Access
-
-```bash
-# Read
-cat "$OBSIDIAN_VAULT_PATH/folder/note.md"
-
-# Write
-cat > "$OBSIDIAN_VAULT_PATH/folder/note.md" << 'EOF'
-# My Note
-Content here
-EOF
-
-# Search
-grep -r "term" "$OBSIDIAN_VAULT_PATH" --include="*.md"
-```
-
 ## Decision Guide
 
-| Need                      | Method        |
-| ------------------------- | ------------- |
-| Fast read/write           | Filesystem    |
-| Quick thoughts/notes      | `thought` CLI |
-| Task management           | `todo` CLI    |
-| Oncall/incidents          | `oncall` CLI  |
-| Agent task dispatch/claim | `kanban` CLI  |
-| Search by frontmatter     | REST API      |
-| Dataview queries          | REST API      |
-| Execute commands          | REST API      |
-| No Obsidian running       | Filesystem    |
+| Need                      | Method         |
+| ------------------------- | -------------- |
+| Read/write notes          | `obsidian` CLI |
+| Search vault              | `obsidian` CLI |
+| Execute commands/snippets | `obsidian` CLI |
+| Quick thoughts/notes      | `thought` CLI  |
+| Task management           | `todo` CLI     |
+| Oncall/incidents          | `oncall` CLI   |
+| Agent task dispatch/claim | `kanban` CLI   |
 
 ## Reference Docs
 
-- [API Reference](references/api-reference.md) - REST API endpoints and curl examples
 - [Thought Reference](references/thought.md) - Quick notes to daily journal
 - [Todo Reference](references/todo.md) - Task management with Obsidian Tasks format
 - [Oncall Reference](references/oncall.md) - Incident tracking and shift management

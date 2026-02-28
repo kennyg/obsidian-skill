@@ -1,32 +1,18 @@
 # Obsidian Skill
 
-Read, write, search, and manage Obsidian vault notes without MCP overhead. Direct filesystem access + REST API.
+Read, write, search, and manage Obsidian vault notes without MCP overhead. Uses the native Obsidian CLI.
 
 ## Dependencies
 
 ### Required
 
-- **[Obsidian](https://obsidian.md/)** - The note-taking app
-- **[Local REST API Plugin](https://github.com/coddingtonbear/obsidian-local-rest-api)** - Exposes vault via HTTP API
-  - Install: Obsidian → Settings → Community Plugins → Browse → "Local REST API"
-  - Get API key: Settings → Local REST API → Copy API Key
-- **[direnv](https://direnv.net/)** - Auto-load environment variables
-  - Install: `brew install direnv` (macOS) or [see docs](https://direnv.net/docs/installation.html)
-  - Setup: Add `eval "$(direnv hook zsh)"` to your `.zshrc`
+- **[Obsidian](https://obsidian.md/)** - The note-taking app (v1.8+ for native CLI)
+- **[Bun](https://bun.sh/)** - For `.ts` scripts — `curl -fsSL https://bun.sh/install | bash`
 
-### Optional (for enhanced features)
+### Optional
 
-- **[Dataview Plugin](https://github.com/blacksmithgu/obsidian-dataview)** - For Dataview DQL queries via API
-- **[Periodic Notes Plugin](https://github.com/liamcain/obsidian-periodic-notes)** - For daily/weekly/monthly notes API
-- **[Templater Plugin](https://github.com/SilentVoid13/Templater)** - For template execution
+- **[obsidian-kanban](https://github.com/mgmeyers/obsidian-kanban)** - For agent mission control boards
 - **[Tasks Plugin](https://github.com/obsidian-tasks-group/obsidian-tasks)** - For task queries (used by `todo.ts`)
-
-### For Scripts
-
-| Script               | Requires                                                             |
-| -------------------- | -------------------------------------------------------------------- |
-| `obsidian-client.ts` | [Bun](https://bun.sh/) - `curl -fsSL https://bun.sh/install \| bash` |
-| `obsidian.sh`        | `curl`, `jq` - `brew install jq`                                     |
 
 ## Setup
 
@@ -34,36 +20,30 @@ Read, write, search, and manage Obsidian vault notes without MCP overhead. Direc
 # 1. Clone/copy skill to your project
 cp -r obsidian-skill /path/to/your/project/.claude/skills/obsidian
 
-# 2. Configure environment
-cp .envrc.example .envrc
-# Edit .envrc with your vault path and API key
+# 2. Optionally set vault name (defaults to active vault)
+export OBSIDIAN_VAULT="my-vault"
 
-# 3. Allow direnv
-direnv allow
-
-# 4. Test
-./scripts/obsidian.sh status
-# or
-bun scripts/obsidian-client.ts status
+# 3. Test
+obsidian vault
 ```
 
 ## Quick Test
 
 ```bash
-# Check connection
-./scripts/obsidian.sh status
+# Vault info
+obsidian vault
 
-# List vault files
-./scripts/obsidian.sh list
+# List files
+obsidian files
 
-# Read today's daily note
-./scripts/obsidian.sh daily
+# Read a note
+obsidian read path="Inbox/Tasks.md"
 
 # Search
-./scripts/obsidian.sh search "project"
+obsidian search query="project"
 
-# Filesystem (no API needed)
-./scripts/obsidian.sh fs-list
+# Daily note
+obsidian daily:read
 ```
 
 ## Oncall Tracking
@@ -183,12 +163,12 @@ obsidian snippet:enable name=agent-mission-control
 
 ## Why Not MCP?
 
-The [obsidian-mcp-tools](https://github.com/jacksteamdev/obsidian-mcp-tools) plugin is just a thin wrapper around the Local REST API. This skill gives you:
+The native Obsidian CLI ships with Obsidian itself — no plugins, no servers, no API keys. This skill gives you:
 
-1. **Direct API access** - No MCP server process to run
-2. **Filesystem fallback** - Works even when Obsidian isn't running
-3. **Typed client** - Full TypeScript/Bun client with autocomplete
-4. **Simpler debugging** - Direct HTTP calls are easier to trace
+1. **Zero setup** - No Local REST API plugin, no API key, no MCP server process
+2. **Full vault access** - Read, write, search, commands, snippets, plugins
+3. **Typed scripts** - Bun + TypeScript wrappers for common workflows
+4. **Simpler debugging** - Direct CLI calls are easy to trace and reproduce
 
 ## Shell Aliases
 
@@ -198,6 +178,7 @@ Add to `.zshrc` or `.bashrc`:
 alias oncall="bun /path/to/obsidian-skill/scripts/oncall.ts"
 alias todo="bun /path/to/obsidian-skill/scripts/todo.ts"
 alias thought="bun /path/to/obsidian-skill/scripts/thought.ts"
+alias kanban="bun /path/to/obsidian-skill/scripts/kanban.ts"
 ```
 
 Usage:
