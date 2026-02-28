@@ -88,12 +88,3 @@ FROM "Journal/Oncall/archive"
 WHERE status = "ended"
 SORT startDate DESC
 ```
-
-## Query via API
-
-```bash
-curl -k -X POST -H "Authorization: Bearer $OBSIDIAN_API_KEY" \
-  -H "Content-Type: application/vnd.olrapi.dataview.dql+txt" \
-  -d 'TABLE startDate, endDate FROM "Journal/Oncall/archive" WHERE status = "ended" SORT startDate DESC' \
-  "https://127.0.0.1:27124/search/"
-```
